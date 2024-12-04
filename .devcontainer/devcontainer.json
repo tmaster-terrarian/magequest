@@ -1,10 +1,13 @@
 {
-    "image": "ghcr.io/markpatterson27/codespaces-vnc-image:universal",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
     "forwardPorts": [6080],
     "portsAttributes": {
         "6080": {
-            "label": "noVNC Viewer",
-            "onAutoForward": "openBrowser"
+            "label": "noVNC Viewer"
         }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/dotnet:2": {},
+        "ghcr.io/devcontainers/features/desktop-lite:1": {}
     }
 }

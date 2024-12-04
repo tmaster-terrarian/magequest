@@ -1,4 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.IO;
+using MageQuest.Graphics;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -6,18 +10,47 @@ namespace MageQuest;
 
 public class Game1 : Game
 {
-    private GraphicsDeviceManager _graphics;
-    private SpriteBatch _spriteBatch;
+    private static GraphicsDeviceManager _graphics;
+
+    private static Camera camera;
+
+    public static Camera Camera => camera;
+
+    public static bool Paused { get; set; }
+
+    public static Logger Logger { get; set; } = new("main");
 
     public Game1()
     {
-        _graphics = new GraphicsDeviceManager(this);
-        Content.RootDirectory = "Content";
+        Renderer.ScreenSize = new Point(320, 240);
+        _graphics = Renderer.GetDefaultGraphicsDeviceManager(this);
+
+        Content.RootDirectory = "data";
         IsMouseVisible = true;
+
+        SoundEffect.Initialize();
     }
 
     protected override void Initialize()
     {
+        Logger.LogInfo("Entering main loop");
+
+        bool configExists = File.Exists(Path.Combine(FileLocations.ProgramPath, "config.ini"));
+
+        PlayerData.ReadConfig();
+
+        _graphics.PreferredBackBufferWidth = Renderer.ScreenSize.X * Renderer.PixelScale;
+        _graphics.PreferredBackBufferHeight = Renderer.ScreenSize.Y * Renderer.PixelScale;
+        Renderer.Initialize(_graphics, GraphicsDevice, Window);
+
+        if(!configExists)
+        {
+            Logger.LogInfo("Regenerating config file");
+            PlayerData.SaveConfig();
+        }
+
+        camera = new();
+
         // TODO: Add your initialization logic here
 
         base.Initialize();
@@ -25,27 +58,45 @@ public class Game1 : Game
 
     protected override void LoadContent()
     {
-        _spriteBatch = new SpriteBatch(GraphicsDevice);
-
         // TODO: use this.Content to load your game content here
+        Renderer.LoadContent();
     }
 
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+        if(PlayerData.Config.Keybinds.Pause.Pressed)
             Exit();
 
         // TODO: Add your update logic here
 
+        UpdatePausable();
+
         base.Update(gameTime);
+    }
+
+    private void UpdatePausable()
+    {
+        if(Paused) return;
+
+        // TODO: Add your update logic here
     }
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.CornflowerBlue);
+        Renderer.BeginDraw(samplerState: SamplerState.PointClamp, transformMatrix: Camera.Transform);
 
-        // TODO: Add your drawing code here
+
+        Renderer.EndDraw();
+        Renderer.BeginDrawUI();
+
+
+        Renderer.EndDrawUI();
 
         base.Draw(gameTime);
+    }
+
+    protected override void EndDraw()
+    {
+        Renderer.FinalizeDraw();
     }
 }

@@ -2,14 +2,12 @@
 	"references": [],
 	"content": {
 		"textures": {
-			"path": "Images/*.png",
+			"path": "graphics/*.png",
 			"recursive": "True",
 			"action": "build",
 			"importer": "TextureImporter",
 			"processor": "TextureProcessor",
 			"processorParam": {
-				"ColorKeyColor": "255,0,255,255",
-				"ColorKeyEnabled": "True",
 				"GenerateMipmaps": "False",
 				"PremultiplyAlpha": "True",
 				"ResizeToPowerOfTwo": "False",
@@ -18,7 +16,7 @@
 			}
 		},
 		"fonts": {
-			"path": "Fonts/*.spritefont",
+			"path": "fonts/*.spritefont",
 			"recursive": "True",
 			"action": "build",
 			"importer": "FontDescriptionImporter",
@@ -29,7 +27,7 @@
 			}
 		},
 		"audioWav": {
-			"path": "Audio/*.wav",
+			"path": "audio/*.wav",
 			"recursive": "True",
 			"action": "build",
 			"importer": "WavImporter",
@@ -39,7 +37,7 @@
 			}
 		},
 		"audioMp3": {
-			"path": "Audio/*.mp3",
+			"path": "audio/*.mp3",
 			"recursive": "True",
 			"action": "build",
 			"importer": "Mp3Importer",
@@ -49,7 +47,7 @@
 			}
 		},
 		"audioOgg": {
-			"path": "Audio/*.ogg",
+			"path": "audio/*.ogg",
 			"recursive": "True",
 			"action": "build",
 			"importer": "OggImporter",
@@ -59,22 +57,12 @@
 			}
 		},
 		"levels": {
-			"path": "Levels/*.json",
-			"recursive": "True",
-			"action": "copy"
-		},
-		"dataJson": {
-			"path": "Data/*.json",
-			"recursive": "True",
-			"action": "copy"
-		},
-		"dataYaml": {
-			"path": "Data/*.yml",
+			"path": "levels/*.json",
 			"recursive": "True",
 			"action": "copy"
 		},
 		"effects": {
-			"path": "Effects/*.fx",
+			"path": "shaders/*.fx",
 			"recursive": "True",
 			"action": "build",
 			"importer": "EffectImporter",
@@ -83,13 +71,8 @@
 				"Debug": "Auto"
 			}
 		},
-		"colorArray": {
-			"path": "Images/*.bin",
-			"recursive": "True",
-			"action": "copy"
-		},
 		"localization": {
-			"path": "Localization/*.json",
+			"path": "localization/*.json",
 			"action": "copy"
 		}
 	}

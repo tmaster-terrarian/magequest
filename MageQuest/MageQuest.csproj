@@ -26,22 +26,7 @@
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.2.1105" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.2.1105" />
-    <PackageReference Include="Nopipeline.Task" Version="2.2.0" />
-    <PackageReference Include="ImGui.NET" Version="1.90.1.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="LDtkMonogame, Version=1.0.0">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>LDtkMonogame.dll</HintPath>
-    </Reference>
-    <Reference Include="LDtk.ContentPipeline, Version=1.0.0">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>LDtk.ContentPipeline.dll</HintPath>
-    </Reference>
-    <Reference Include="Monogame.ImGuiNet, Version=0.1.0">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Monogame.ImGuiNet.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Nopipeline.Task" Version="2.3.0" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />

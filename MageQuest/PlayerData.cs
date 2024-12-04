@@ -24,17 +24,17 @@ public static class PlayerData
     {
         _config = new(_configPath);
 
-        Config.Keybinds.Right = ReadMappedInputData(_config.Read("right",   ConfigSection_Keybinds, "KB:Right")) ?? Config.Keybinds.Right;
-        Config.Keybinds.Left = ReadMappedInputData(_config.Read("left",   ConfigSection_Keybinds, "KB:Left")) ?? Config.Keybinds.Left;
-        Config.Keybinds.Down = ReadMappedInputData(_config.Read("down",   ConfigSection_Keybinds, "KB:Down")) ?? Config.Keybinds.Down;
-        Config.Keybinds.Up = ReadMappedInputData(_config.Read("up",   ConfigSection_Keybinds, "KB:Up")) ?? Config.Keybinds.Up;
+        Config.Keybinds.Right = ReadMappedInputData(_config.Get("right",   ConfigSection_Keybinds, "KB:Right")) ?? Config.Keybinds.Right;
+        Config.Keybinds.Left = ReadMappedInputData(_config.Get("left",   ConfigSection_Keybinds, "KB:Left")) ?? Config.Keybinds.Left;
+        Config.Keybinds.Down = ReadMappedInputData(_config.Get("down",   ConfigSection_Keybinds, "KB:Down")) ?? Config.Keybinds.Down;
+        Config.Keybinds.Up = ReadMappedInputData(_config.Get("up",   ConfigSection_Keybinds, "KB:Up")) ?? Config.Keybinds.Up;
 
-        Config.Keybinds.Jump = ReadMappedInputData(_config.Read("jump",   ConfigSection_Keybinds, "KB:Z")) ?? Config.Keybinds.Jump;
-        Config.Keybinds.Attack = ReadMappedInputData(_config.Read("attack",   ConfigSection_Keybinds, "KB:X")) ?? Config.Keybinds.Attack;
+        Config.Keybinds.Jump = ReadMappedInputData(_config.Get("jump",   ConfigSection_Keybinds, "KB:Z")) ?? Config.Keybinds.Jump;
+        Config.Keybinds.Attack = ReadMappedInputData(_config.Get("attack",   ConfigSection_Keybinds, "KB:X")) ?? Config.Keybinds.Attack;
 
-        Config.Keybinds.Pause = ReadMappedInputData(_config.Read("pause",   ConfigSection_Keybinds, "KB:Escape")) ?? Config.Keybinds.Pause;
+        Config.Keybinds.Pause = ReadMappedInputData(_config.Get("pause",   ConfigSection_Keybinds, "KB:Escape")) ?? Config.Keybinds.Pause;
 
-        if(int.TryParse(_config.Read("scale", ConfigSection_Graphics, "1"), out int value))
+        if(int.TryParse(_config.Get("scale", ConfigSection_Graphics, "1"), out int value))
         {
             Graphics.Renderer.PixelScale = value;
         }
@@ -52,7 +52,9 @@ public static class PlayerData
 
         WriteMappedInputData("pause", Config.Keybinds.Pause);
 
-        _config.Write("scale", Graphics.Renderer.PixelScale.ToString(), ConfigSection_Graphics);
+        _config.Set("scale", Graphics.Renderer.PixelScale.ToString(), ConfigSection_Graphics);
+
+        _config.Write(_configPath);
     }
 
     public class Save
@@ -100,7 +102,7 @@ public static class PlayerData
 
     private static void WriteMappedInputData(string key, MappedInput mappedInput)
     {
-        _config.Write(key, $"{mappedInput}", ConfigSection_Keybinds);
+        _config.Set(key, $"{mappedInput}", ConfigSection_Keybinds);
     }
 
     private static Keys MapKeyboard(string name)

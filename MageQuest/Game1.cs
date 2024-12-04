@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using MageQuest.Graphics;
 
 using Microsoft.Xna.Framework;
@@ -29,6 +30,8 @@ public class Game1 : Game
         IsMouseVisible = true;
 
         SoundEffect.Initialize();
+
+        Window.Title = "Mage Quest!";
     }
 
     protected override void Initialize()
@@ -51,7 +54,7 @@ public class Game1 : Game
 
         camera = new();
 
-        // TODO: Add your initialization logic here
+        Exiting += Game_Exiting;
 
         base.Initialize();
     }
@@ -64,8 +67,21 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
-        if(PlayerData.Config.Keybinds.Pause.Pressed)
+        Input.InputDisabled = !IsActive;
+
+        Input.RefreshKeyboardState();
+        Input.RefreshMouseState();
+        Input.RefreshGamePadState();
+
+        Input.UpdateTypingInput(gameTime);
+
+        if(PlayerData.Config.Keybinds.Pause?.Pressed ?? false)
             Exit();
+
+        if(Input.GetPressed(Keys.OemPlus))
+            Renderer.PixelScale++;
+        if(Input.GetPressed(Keys.OemMinus))
+            Renderer.PixelScale--;
 
         // TODO: Add your update logic here
 
@@ -98,5 +114,10 @@ public class Game1 : Game
     protected override void EndDraw()
     {
         Renderer.FinalizeDraw();
+    }
+
+    private void Game_Exiting(object sender, ExitingEventArgs e)
+    {
+        PlayerData.SaveConfig();
     }
 }

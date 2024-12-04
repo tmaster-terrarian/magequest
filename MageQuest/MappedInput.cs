@@ -51,7 +51,7 @@ public abstract class MappedInput(InputType inputType)
 
         public override string ToString()
         {
-            return $"M:{mouseButton}";
+            return $"MB:{mouseButton}";
         }
     }
 }

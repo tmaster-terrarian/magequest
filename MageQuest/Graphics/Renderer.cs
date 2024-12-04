@@ -114,6 +114,10 @@ public static class Renderer
             RenderTarget = new RenderTarget2D(GraphicsDevice, ScreenSize.X, ScreenSize.Y);
             UIRenderTarget = new RenderTarget2D(GraphicsDevice, ScreenSize.X, ScreenSize.Y);
 
+            _dirty = false;
+
+            Window.Position = new((GraphicsDevice.DisplayMode.Width - _graphics.PreferredBackBufferWidth) / 2, (GraphicsDevice.DisplayMode.Height - _graphics.PreferredBackBufferHeight) / 2);
+
             if(GraphicsDevice.DisplayMode.Height == _graphics.PreferredBackBufferHeight)
             {
                 Window.Position = Point.Zero;
@@ -121,13 +125,10 @@ public static class Renderer
             }
             else if(Window.IsBorderless)
             {
-                Window.Position = new((GraphicsDevice.DisplayMode.Width - _graphics.PreferredBackBufferWidth) / 2, (GraphicsDevice.DisplayMode.Height - _graphics.PreferredBackBufferHeight) / 2);
                 Window.IsBorderless = false;
             }
 
             _graphics.ApplyChanges();
-
-            _dirty = false;
         }
 
         GraphicsDevice.SetRenderTarget(RenderTarget);

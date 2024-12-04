@@ -24,15 +24,15 @@ public static class PlayerData
     {
         _config = new(_configPath);
 
-        ReadMappedInputData(_config.Read("right",   ConfigSection_Keybinds, "KB:Right"),    ref Config.Keybinds.Right);
-        ReadMappedInputData(_config.Read("left",    ConfigSection_Keybinds, "KB:Left"),     ref Config.Keybinds.Left);
-        ReadMappedInputData(_config.Read("down",    ConfigSection_Keybinds, "KB:Down"),     ref Config.Keybinds.Down);
-        ReadMappedInputData(_config.Read("up",      ConfigSection_Keybinds, "KB:Up"),       ref Config.Keybinds.Up);
+        Config.Keybinds.Right = ReadMappedInputData(_config.Read("right",   ConfigSection_Keybinds, "KB:Right")) ?? Config.Keybinds.Right;
+        Config.Keybinds.Left = ReadMappedInputData(_config.Read("left",   ConfigSection_Keybinds, "KB:Left")) ?? Config.Keybinds.Left;
+        Config.Keybinds.Down = ReadMappedInputData(_config.Read("down",   ConfigSection_Keybinds, "KB:Down")) ?? Config.Keybinds.Down;
+        Config.Keybinds.Up = ReadMappedInputData(_config.Read("up",   ConfigSection_Keybinds, "KB:Up")) ?? Config.Keybinds.Up;
 
-        ReadMappedInputData(_config.Read("jump",    ConfigSection_Keybinds, "KB:Z"),        ref Config.Keybinds.Jump);
-        ReadMappedInputData(_config.Read("attack",  ConfigSection_Keybinds, "KB:X"),        ref Config.Keybinds.Attack);
+        Config.Keybinds.Jump = ReadMappedInputData(_config.Read("jump",   ConfigSection_Keybinds, "KB:Z")) ?? Config.Keybinds.Jump;
+        Config.Keybinds.Attack = ReadMappedInputData(_config.Read("attack",   ConfigSection_Keybinds, "KB:X")) ?? Config.Keybinds.Attack;
 
-        ReadMappedInputData(_config.Read("pause",   ConfigSection_Keybinds, "KB:Escape"),   ref Config.Keybinds.Pause);
+        Config.Keybinds.Pause = ReadMappedInputData(_config.Read("pause",   ConfigSection_Keybinds, "KB:Escape")) ?? Config.Keybinds.Pause;
 
         if(int.TryParse(_config.Read("scale", ConfigSection_Graphics, "1"), out int value))
         {
@@ -81,22 +81,20 @@ public static class PlayerData
         }
     }
 
-    private static void ReadMappedInputData(string value, ref MappedInput mappedInput)
+    private static MappedInput ReadMappedInputData(string value)
     {
-        if(value is null) return;
+        if(value is null) return null;
 
-        string[] split = value.Split(':', 2);
-        switch(split[0])
+        switch(value[..2])
         {
             case "KB":
-                mappedInput = new MappedInput.Keyboard(MapKeyboard(split[1]));
-                break;
+                return new MappedInput.Keyboard(MapKeyboard(value[3..]));
             case "GP":
-                mappedInput = new MappedInput.GamePad(MapGamepad(split[1]), PlayerIndex.One);
-                break;
-            case "M":
-                mappedInput = new MappedInput.Mouse(MapMouse(split[1]));
-                break;
+                return new MappedInput.GamePad(MapGamepad(value[3..]), PlayerIndex.One);
+            case "MB":
+                return new MappedInput.Mouse(MapMouse(value[3..]));
+            default:
+                return null;
         }
     }
 
@@ -108,18 +106,18 @@ public static class PlayerData
     private static Keys MapKeyboard(string name)
     {
         return Enum.GetValues<Keys>()
-            .First(key => key.ToString().Equals(name));
+            .First(key => Enum.GetName(key).Equals(name));
     }
 
     private static Buttons MapGamepad(string name)
     {
         return Enum.GetValues<Buttons>()
-            .First(key => key.ToString().Equals(name));
+            .First(key => Enum.GetName(key).Equals(name));
     }
 
     private static MouseButtons MapMouse(string name)
     {
         return Enum.GetValues<MouseButtons>()
-            .First(key => key.ToString().Equals(name));
+            .First(key => Enum.GetName(key).Equals(name));
     }
 }

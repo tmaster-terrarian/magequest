@@ -63,16 +63,18 @@ public class IniFile
 
             fileStream.WriteByte(Encoding.UTF8.GetBytes(['\n'])[0]);
         }
+
     }
 
     public void Write(string path)
     {
-        Write(new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write));
+        using FileStream fileStream = new(path, FileMode.OpenOrCreate, FileAccess.Write);
+        Write(fileStream);
     }
 
     public static IniRoot Parse(string data)
     {
-        StringReader reader = new(data);
+        using StringReader reader = new(data);
         IniRoot result = [];
 
         IniDict<string> currentSection = null;

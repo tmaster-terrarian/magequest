@@ -29,7 +29,14 @@ public class Game1 : Game
         Content.RootDirectory = "data";
         IsMouseVisible = true;
 
-        SoundEffect.Initialize();
+        try
+        {
+            SoundEffect.Initialize();
+        }
+        catch(Exception e)
+        {
+            Logger.LogError($"Failed to initialize audio: {e}");
+        }
 
         Window.Title = "Mage Quest!";
     }

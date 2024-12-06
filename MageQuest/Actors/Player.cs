@@ -1,4 +1,4 @@
-namespace MageQuest;
+namespace MageQuest.Actors;
 
 public class Player
 {

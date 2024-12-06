@@ -23,7 +23,7 @@ public class Game1 : Game
 
     public Game1()
     {
-        Renderer.ScreenSize = new Point(320, 240);
+        Renderer.ScreenSize = new Point(160, 120);
         _graphics = Renderer.GetDefaultGraphicsDeviceManager(this);
 
         Content.RootDirectory = "data";
@@ -45,19 +45,23 @@ public class Game1 : Game
     {
         Logger.LogInfo("Entering main loop");
 
-        bool configExists = File.Exists(Path.Combine(FileLocations.ProgramPath, "config.ini"));
+        {
+            bool configExists = File.Exists(Path.Combine(FileLocations.ProgramPath, "config.ini"));
 
-        PlayerData.ReadConfig();
+            PlayerData.ReadConfig();
+
+            if(!configExists)
+            {
+                Logger.LogInfo("Regenerating config file");
+                PlayerData.SaveConfig();
+            }
+        }
 
         _graphics.PreferredBackBufferWidth = Renderer.ScreenSize.X * Renderer.PixelScale;
         _graphics.PreferredBackBufferHeight = Renderer.ScreenSize.Y * Renderer.PixelScale;
         Renderer.Initialize(_graphics, GraphicsDevice, Window);
 
-        if(!configExists)
-        {
-            Logger.LogInfo("Regenerating config file");
-            PlayerData.SaveConfig();
-        }
+        ContentLoader.Initialize(Content);
 
         camera = new();
 
@@ -92,12 +96,12 @@ public class Game1 : Game
 
         // TODO: Add your update logic here
 
-        UpdatePausable();
+        UpdatePausables();
 
         base.Update(gameTime);
     }
 
-    private void UpdatePausable()
+    private void UpdatePausables()
     {
         if(Paused) return;
 
@@ -112,6 +116,7 @@ public class Game1 : Game
         Renderer.EndDraw();
         Renderer.BeginDrawUI();
 
+        Renderer.SpriteBatch.DrawString(Fonts.Regular, "testing hi", new FPoint(1, 1).ToVector2(), Color.White);
 
         Renderer.EndDrawUI();
 

@@ -35,7 +35,27 @@ public static class PointExtensions
         return MathF.Sqrt(p.X * p.X + p.Y * p.Y);
     }
 
+    public static int DistanceSquared(this FPoint point, FPoint other)
+    {
+        var p = point - other;
+        return p.X * p.X + p.Y * p.Y;
+    }
+
+    /// <summary>
+    /// Slower than <see cref="DistanceSquared"/>
+    /// </summary>
+    public static float Distance(this FPoint point, FPoint other)
+    {
+        var p = point - other;
+        return MathF.Sqrt(p.X * p.X + p.Y * p.Y);
+    }
+
     public static float ToRotation(this Point value)
+    {
+        return MathF.Atan2(value.Y, value.X);
+    }
+
+    public static float ToRotation(this FPoint value)
     {
         return MathF.Atan2(value.Y, value.X);
     }

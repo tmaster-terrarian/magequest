@@ -1,2 +1,2 @@
-﻿using var game = new MageQuest.Game1();
+﻿using var game = new MageQuest.Main();
 game.Run();

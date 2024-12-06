@@ -13,14 +13,10 @@ public static class Fonts
     public static SpriteFont Bold => _bold;
     public static SpriteFont Italic => _italic;
 
-    public static void LoadContent(ContentManager content)
+    public static void LoadContent()
     {
-        _regular = content.Load<SpriteFont>("fonts/default");
-        _bold = content.Load<SpriteFont>("fonts/defaultBold");
-        _italic = content.Load<SpriteFont>("fonts/defaultItalic");
-
-        _regular.DefaultCharacter = '\x10';
-        _bold.DefaultCharacter = '\x10';
-        _italic.DefaultCharacter = '\x10';
+        _regular = ContentLoader.Load<SpriteFont>("fonts/default");
+        _bold = ContentLoader.Load<SpriteFont>("fonts/defaultBold");
+        _italic = ContentLoader.Load<SpriteFont>("fonts/defaultItalic");
     }
 }

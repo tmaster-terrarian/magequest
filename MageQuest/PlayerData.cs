@@ -24,15 +24,13 @@ public static class PlayerData
     {
         _config = new(_configPath);
 
-        Config.Keybinds.Right = ReadMappedInputData(_config.Get("right",   ConfigSection_Keybinds, "KB:Right")) ?? Config.Keybinds.Right;
-        Config.Keybinds.Left = ReadMappedInputData(_config.Get("left",   ConfigSection_Keybinds, "KB:Left")) ?? Config.Keybinds.Left;
-        Config.Keybinds.Down = ReadMappedInputData(_config.Get("down",   ConfigSection_Keybinds, "KB:Down")) ?? Config.Keybinds.Down;
-        Config.Keybinds.Up = ReadMappedInputData(_config.Get("up",   ConfigSection_Keybinds, "KB:Up")) ?? Config.Keybinds.Up;
-
-        Config.Keybinds.Jump = ReadMappedInputData(_config.Get("jump",   ConfigSection_Keybinds, "KB:Z")) ?? Config.Keybinds.Jump;
-        Config.Keybinds.Attack = ReadMappedInputData(_config.Get("attack",   ConfigSection_Keybinds, "KB:X")) ?? Config.Keybinds.Attack;
-
-        Config.Keybinds.Pause = ReadMappedInputData(_config.Get("pause",   ConfigSection_Keybinds, "KB:Escape")) ?? Config.Keybinds.Pause;
+        Config.Keybinds.Right  = ReadMappedInputData(_config.Get("right",  ConfigSection_Keybinds, "KB:Right"))  ?? Config.Keybinds.Right;
+        Config.Keybinds.Left   = ReadMappedInputData(_config.Get("left",   ConfigSection_Keybinds, "KB:Left"))   ?? Config.Keybinds.Left;
+        Config.Keybinds.Down   = ReadMappedInputData(_config.Get("down",   ConfigSection_Keybinds, "KB:Down"))   ?? Config.Keybinds.Down;
+        Config.Keybinds.Up     = ReadMappedInputData(_config.Get("up",     ConfigSection_Keybinds, "KB:Up"))     ?? Config.Keybinds.Up;
+        Config.Keybinds.Jump   = ReadMappedInputData(_config.Get("jump",   ConfigSection_Keybinds, "KB:Z"))      ?? Config.Keybinds.Jump;
+        Config.Keybinds.Attack = ReadMappedInputData(_config.Get("attack", ConfigSection_Keybinds, "KB:X"))      ?? Config.Keybinds.Attack;
+        Config.Keybinds.Pause  = ReadMappedInputData(_config.Get("pause",  ConfigSection_Keybinds, "KB:Escape")) ?? Config.Keybinds.Pause;
 
         if(int.TryParse(_config.Get("scale", ConfigSection_Graphics, "1"), out int value))
         {
@@ -57,24 +55,19 @@ public static class PlayerData
         _config.Write(_configPath);
     }
 
-    public class Save
-    {
-        
-    }
-
     public static class Config
     {
         public static class Keybinds
         {
-            public static MappedInput Right;
-            public static MappedInput Left;
-            public static MappedInput Down;
-            public static MappedInput Up;
+            public static MappedInput Right = new MappedInput.Keyboard(Keys.Right);
+            public static MappedInput Left = new MappedInput.Keyboard(Keys.Left);
+            public static MappedInput Down = new MappedInput.Keyboard(Keys.Down);
+            public static MappedInput Up = new MappedInput.Keyboard(Keys.Up);
 
-            public static MappedInput Jump;
-            public static MappedInput Attack;
+            public static MappedInput Jump = new MappedInput.Keyboard(Keys.Z);
+            public static MappedInput Attack = new MappedInput.Keyboard(Keys.X);
 
-            public static MappedInput Pause;
+            public static MappedInput Pause = new MappedInput.Keyboard(Keys.Escape);
         }
 
         public static class Graphics
@@ -86,18 +79,15 @@ public static class PlayerData
     private static MappedInput ReadMappedInputData(string value)
     {
         if(value is null) return null;
+        if(value.Length < 4) return null;
 
-        switch(value[..2])
+        return value[..2] switch
         {
-            case "KB":
-                return new MappedInput.Keyboard(MapKeyboard(value[3..]));
-            case "GP":
-                return new MappedInput.GamePad(MapGamepad(value[3..]), PlayerIndex.One);
-            case "MB":
-                return new MappedInput.Mouse(MapMouse(value[3..]));
-            default:
-                return null;
-        }
+            "KB" => new MappedInput.Keyboard(MapKeyboard(value[3..])),
+            "GP" => new MappedInput.GamePad(MapGamepad(value[3..]), PlayerIndex.One),
+            "MB" => new MappedInput.Mouse(MapMouse(value[3..])),
+            _ => null,
+        };
     }
 
     private static void WriteMappedInputData(string key, MappedInput mappedInput)

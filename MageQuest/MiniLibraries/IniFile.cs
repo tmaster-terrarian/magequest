@@ -1,6 +1,7 @@
 // modified from original
 // source: https://stackoverflow.com/a/14906422
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -68,7 +69,7 @@ public class IniFile
 
     public void Write(string path)
     {
-        using FileStream fileStream = new(path, FileMode.OpenOrCreate, FileAccess.Write);
+        using FileStream fileStream = new(path, FileMode.Create, FileAccess.Write);
         Write(fileStream);
     }
 
@@ -80,13 +81,16 @@ public class IniFile
         IniDict<string> currentSection = null;
         string currentSectionName = null;
 
+        int lineNum = 0;
         while(reader.Peek() != -1)
         {
             var line = reader.ReadLine();
+            lineNum++;
 
             // ignore empty lines
             if(line is null || line == "")
             {
+                Console.WriteLine($"{lineNum}: empty");
                 continue;
             }
 
@@ -94,6 +98,7 @@ public class IniFile
             if(line[^1] == '\r')
             {
                 line = line[..^1];
+                Console.WriteLine($"{lineNum}: CR");
                 if(line == "") continue;
             }
 
@@ -114,8 +119,13 @@ public class IniFile
             while(line[0] == ' ' || line[0] == '\t')
             {
                 line = line[1..];
+                Console.WriteLine($"{lineNum}: preceeding whitespace");
             }
-            if(line == "" || line[0] == ';') continue;
+            if(line == "" || line[0] == ';')
+            {
+                Console.WriteLine($"{lineNum}: all whitespace, or comment");
+                continue;
+            }
 
             // read section
             if(line[0] == '[')
@@ -124,11 +134,14 @@ public class IniFile
 
                 if(currentSection is not null)
                 {
-                    result.Add(currentSectionName, currentSection);
+                    result[currentSectionName] = currentSection;
+                    Console.WriteLine($"parsed section '{currentSectionName}': {string.Join(", ", currentSection)}");
                 }
 
                 currentSectionName = line[1..^1];
                 currentSection = [];
+
+                Console.WriteLine($"{lineNum}: begin section '{currentSectionName}'");
                 continue;
             }
 
@@ -137,9 +150,17 @@ public class IniFile
             if(ind <= 0) continue;
 
             string key = line[..ind];
-            string value = line[ind..];
+            string value = line[(ind + 1)..];
 
-            currentSection.Add(key, value);
+            Console.WriteLine($"{lineNum}: value '{key}={value}'");
+
+            currentSection[key] = value;
+        }
+
+        if(currentSection is not null)
+        {
+            result[currentSectionName] = currentSection;
+            Console.WriteLine($"parsed section '{currentSectionName}': {string.Join(", ", currentSection)}");
         }
 
         return result;
@@ -149,7 +170,9 @@ public class IniFile
     {
         public string GetValueOrDefault(string key, string defaultValue, string sectionName)
         {
-            return this[sectionName]?.GetValueOrDefault(key, defaultValue) ?? defaultValue;
+            if(!this.ContainsKey(sectionName)) return defaultValue;
+
+            return this[sectionName].GetValueOrDefault(key, defaultValue);
         }
     }
 
@@ -161,7 +184,7 @@ public class IniFile
 
         public T this[string key]
         {
-            get => _internal.TryGetValue(key, out T value) ? value : GetDefaultValue();
+            get => GetValueOrDefault(key, GetDefaultValue());
             set => _internal[key] = value;
         }
 
@@ -175,12 +198,12 @@ public class IniFile
 
         public void Add(string key, T value)
         {
-            _internal.TryAdd(key, value);
+            _internal.Add(key, value);
         }
 
         public void Add(KeyValuePair<string, T> item)
         {
-            _internal.TryAdd(item.Key, item.Value);
+            _internal.Add(item.Key, item.Value);
         }
 
         public T GetValueOrDefault(string key, T defaultValue)

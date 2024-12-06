@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace MageQuest;
 
-public class Game1 : Game
+public class Main : Game
 {
     private static GraphicsDeviceManager _graphics;
 
@@ -21,9 +21,12 @@ public class Game1 : Game
 
     public static Logger Logger { get; set; } = new("main");
 
-    public Game1()
+    public static CoroutineRunner GlobalCoroutines { get; } = new();
+    public static CoroutineRunner LevelCoroutines { get; } = new();
+
+    public Main()
     {
-        Renderer.ScreenSize = new Point(160, 120);
+        Renderer.ScreenSize = new Point(320, 240);
         _graphics = Renderer.GetDefaultGraphicsDeviceManager(this);
 
         Content.RootDirectory = "data";
@@ -74,6 +77,7 @@ public class Game1 : Game
     {
         // TODO: use this.Content to load your game content here
         Renderer.LoadContent();
+        Fonts.LoadContent();
     }
 
     protected override void Update(GameTime gameTime)
@@ -98,12 +102,16 @@ public class Game1 : Game
 
         UpdatePausables();
 
+        GlobalCoroutines.Update();
+
         base.Update(gameTime);
     }
 
     private void UpdatePausables()
     {
         if(Paused) return;
+
+        LevelCoroutines.Update();
 
         // TODO: Add your update logic here
     }
@@ -116,16 +124,13 @@ public class Game1 : Game
         Renderer.EndDraw();
         Renderer.BeginDrawUI();
 
-        Renderer.SpriteBatch.DrawString(Fonts.Regular, "testing hi", new FPoint(1, 1).ToVector2(), Color.White);
+        Renderer.SpriteBatch.DrawStringSpacesFix(Fonts.Regular, "testing hi", new FPoint(1, 1).ToVector2(), Color.White, 6);
 
         Renderer.EndDrawUI();
 
-        base.Draw(gameTime);
-    }
-
-    protected override void EndDraw()
-    {
         Renderer.FinalizeDraw();
+
+        base.Draw(gameTime);
     }
 
     private void Game_Exiting(object sender, ExitingEventArgs e)

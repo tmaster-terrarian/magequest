@@ -29,8 +29,11 @@ public static class BaseRenderer
     public static int PixelScale {
         get => pixelScale;
         set {
-            pixelScale = MathHelper.Max(value, 1);
-            _dirty = true;
+            if(pixelScale != MathHelper.Max(value, 1))
+            {
+                pixelScale = MathHelper.Max(value, 1);
+                _dirty = true;
+            }
         }
     }
 

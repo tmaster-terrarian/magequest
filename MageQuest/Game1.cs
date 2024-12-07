@@ -83,8 +83,7 @@ public class Main : Game
 
     protected override void BeginRun()
     {
-        Actor.Initialize(new Player());
-        Actor.Initialize(new Player());
+        var player = Actor.Initialize(new Player());
 
         Actor.DoStart();
     }
@@ -122,6 +121,8 @@ public class Main : Game
 
         LevelCoroutines.Update();
 
+        Actor.DoUpdate();
+
         // TODO: Add your update logic here
     }
 
@@ -129,6 +130,7 @@ public class Main : Game
     {
         BaseRenderer.BeginDraw(samplerState: SamplerState.PointClamp, transformMatrix: Camera.Transform);
 
+        Actor.DoDraw();
 
         BaseRenderer.EndDraw();
         BaseRenderer.BeginDrawUI();

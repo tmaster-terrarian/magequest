@@ -10,7 +10,7 @@ public class Actor : IDisposable
     private static ulong _lastId;
 
     private static readonly List<Actor> actors = [];
-    private static readonly List<(Solid, int)> solids = [];
+    private static readonly HashSet<(Solid, int)> solids = [];
 
     private static bool _locked = false;
 
@@ -44,10 +44,12 @@ public class Actor : IDisposable
             actor.Dispose();
         }
 
+        solids.Clear();
         actors.Clear();
 
         GC.Collect();
 
+        _lastId = 0;
         _locked = false;
     }
 
@@ -72,14 +74,21 @@ public class Actor : IDisposable
     public static void Disable(Actor actor)
     {
         if(actor.Enabled)
+        {
+            if(actor is Solid solid)
+            {
+                solids.Remove((solid, solid.SolidID));
+            }
+
             actor.Disabled();
+        }
     }
 
     public static void Enable(Actor actor)
     {
         if(actor is Solid solid && !actor.Enabled)
         {
-            
+            solids.Add((solid, solid.SolidID));
         }
 
         actor.Enabled = true;
@@ -111,7 +120,7 @@ public class Actor : IDisposable
 
     public event Action Disposed;
 
-    public bool Enabled { get; private set; }
+    public bool Enabled { get; private set; } = true;
 
     public ulong ID => _id;
 

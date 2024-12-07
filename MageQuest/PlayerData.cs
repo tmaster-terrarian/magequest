@@ -24,7 +24,7 @@ public static class PlayerData
 
     public static void ReadConfig()
     {
-        _config = new(File.ReadAllText(_configPath));
+        _config = new(File.Exists(_configPath) ? File.ReadAllText(_configPath) : "");
 
         Config.Keybinds.Right  = ReadMappedInputData(_config.Get("right",  ConfigSection_Keybinds, "KB:Right"))  ?? Config.Keybinds.Right;
         Config.Keybinds.Left   = ReadMappedInputData(_config.Get("left",   ConfigSection_Keybinds, "KB:Left"))   ?? Config.Keybinds.Left;

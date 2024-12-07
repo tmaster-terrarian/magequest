@@ -43,7 +43,7 @@ public struct FPoint : IEquatable<FPoint>
     internal readonly string DebugDisplayString => $"{XPixels}.{Math.Abs(X & 0x1FF)}  {YPixels}.{Math.Abs(Y & 0x1FF)}";
 
     /// <summary>
-    /// Constructs a point with X and Y from two values
+    /// Constructs a point with X and Y from two values.
     /// </summary>
     /// <param name="x">The x coordinate in 2d-space.</param>
     /// <param name="y">The y coordinate in 2d-space.</param>
@@ -54,7 +54,7 @@ public struct FPoint : IEquatable<FPoint>
     }
 
     /// <summary>
-    /// Constructs a point with X and Y from two values
+    /// Constructs a point with X and Y from two values. Values will be multiplied by 0x200.
     /// </summary>
     /// <param name="x">The x coordinate in 2d-space.</param>
     /// <param name="y">The y coordinate in 2d-space.</param>
@@ -75,7 +75,7 @@ public struct FPoint : IEquatable<FPoint>
     }
 
     /// <summary>
-    /// Constructs a point with X and Y set to the same value.
+    /// Constructs a point with X and Y set to the same value. Values will be multiplied by 0x200.
     /// </summary>
     /// <param name="value">The x and y coordinates in 2d-space.</param>
     public FPoint(int value)

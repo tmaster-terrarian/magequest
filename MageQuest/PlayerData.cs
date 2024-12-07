@@ -1,8 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json.Serialization;
+
+using MageQuest.Graphics;
+using MageQuest.IO;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -16,13 +17,14 @@ public static class PlayerData
     public static IniFile ConfigFile => _config;
 
     private const string ConfigSection_Keybinds = "Keybinds";
+    private const string ConfigSection_GamepadBinds = "GamepadBinds";
     private const string ConfigSection_Graphics = "Graphics";
 
     private static readonly string _configPath = Path.Combine(FileLocations.ProgramPath, "config.ini");
 
     public static void ReadConfig()
     {
-        _config = new(_configPath);
+        _config = new(File.ReadAllText(_configPath));
 
         Config.Keybinds.Right  = ReadMappedInputData(_config.Get("right",  ConfigSection_Keybinds, "KB:Right"))  ?? Config.Keybinds.Right;
         Config.Keybinds.Left   = ReadMappedInputData(_config.Get("left",   ConfigSection_Keybinds, "KB:Left"))   ?? Config.Keybinds.Left;
@@ -34,7 +36,7 @@ public static class PlayerData
 
         if(int.TryParse(_config.Get("scale", ConfigSection_Graphics, "1"), out int value))
         {
-            Graphics.Renderer.PixelScale = value;
+            BaseRenderer.PixelScale = value;
         }
     }
 
@@ -50,7 +52,7 @@ public static class PlayerData
 
         WriteMappedInputData("pause", Config.Keybinds.Pause);
 
-        _config.Set("scale", Graphics.Renderer.PixelScale.ToString(), ConfigSection_Graphics);
+        _config.Set("scale", BaseRenderer.PixelScale.ToString(), ConfigSection_Graphics);
 
         _config.Write(_configPath);
     }
@@ -68,11 +70,6 @@ public static class PlayerData
             public static MappedInput Attack = new MappedInput.Keyboard(Keys.X);
 
             public static MappedInput Pause = new MappedInput.Keyboard(Keys.Escape);
-        }
-
-        public static class Graphics
-        {
-            
         }
     }
 

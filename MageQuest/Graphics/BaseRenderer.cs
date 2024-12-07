@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MageQuest.Graphics;
 
-public static class Renderer
+public static class BaseRenderer
 {
     private static GraphicsDeviceManager _graphics;
     private static RendererState _state = RendererState.Idle;

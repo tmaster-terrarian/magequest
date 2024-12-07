@@ -22,7 +22,7 @@ public struct FPoint : IEquatable<FPoint>
     public static FPoint UnitX => unitXFPoint;
     public static FPoint UnitY => unitYFPoint;
 
-    public const int SHFT = 9;
+    public const int SHFT = Constants.SHFT;
     public const int MULT = 0b1 << SHFT;
 
     [DataMember]

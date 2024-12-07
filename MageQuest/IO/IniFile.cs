@@ -8,20 +8,13 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 
-namespace MageQuest;
+namespace MageQuest.IO;
 
-public class IniFile
+public class IniFile(string data = null)
 {
-    readonly IniRoot _parsed;
+    readonly IniRoot _parsed = Parse(data);
 
-    public IniFile(string IniPath = null)
-    {
-        var path = Path.Combine(
-            FileLocations.ProgramPath,
-            IniPath.EndsWith(".ini") ? IniPath : $"{IniPath}.ini"
-        );
-        _parsed = Parse(File.Exists(path) ? File.ReadAllText(path) : "");
-    }
+    public IniRoot Data => _parsed;
 
     public string Get(string Key, string Section, string Default = null)
     {
@@ -49,22 +42,21 @@ public class IniFile
         return Get(Key, Section) is not null;
     }
 
-    public void Write(FileStream fileStream)
+    public void Write(Stream stream)
     {
         foreach(var section in _parsed)
         {
             byte[] sectionTitle = Encoding.UTF8.GetBytes($"[{section.Key}]\n");
-            fileStream.Write(sectionTitle, 0, sectionTitle.Length);
+            stream.Write(sectionTitle, 0, sectionTitle.Length);
 
             foreach(var key in section.Value)
             {
                 byte[] value = Encoding.UTF8.GetBytes($"{key.Key}={key.Value}\n");
-                fileStream.Write(value, 0, value.Length);
+                stream.Write(value, 0, value.Length);
             }
 
-            fileStream.WriteByte(Encoding.UTF8.GetBytes(['\n'])[0]);
+            stream.WriteByte(Encoding.UTF8.GetBytes(['\n'])[0]);
         }
-
     }
 
     public void Write(string path)

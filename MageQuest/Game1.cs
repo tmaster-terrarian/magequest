@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using MageQuest.Actors;
 using MageQuest.Graphics;
 
 using Microsoft.Xna.Framework;
@@ -26,8 +27,8 @@ public class Main : Game
 
     public Main()
     {
-        Renderer.ScreenSize = new Point(320, 240);
-        _graphics = Renderer.GetDefaultGraphicsDeviceManager(this);
+        BaseRenderer.ScreenSize = new Point(320, 240);
+        _graphics = BaseRenderer.GetDefaultGraphicsDeviceManager(this);
 
         Content.RootDirectory = "data";
         IsMouseVisible = true;
@@ -60,9 +61,9 @@ public class Main : Game
             }
         }
 
-        _graphics.PreferredBackBufferWidth = Renderer.ScreenSize.X * Renderer.PixelScale;
-        _graphics.PreferredBackBufferHeight = Renderer.ScreenSize.Y * Renderer.PixelScale;
-        Renderer.Initialize(_graphics, GraphicsDevice, Window);
+        _graphics.PreferredBackBufferWidth = BaseRenderer.ScreenSize.X * BaseRenderer.PixelScale;
+        _graphics.PreferredBackBufferHeight = BaseRenderer.ScreenSize.Y * BaseRenderer.PixelScale;
+        BaseRenderer.Initialize(_graphics, GraphicsDevice, Window);
 
         ContentLoader.Initialize(Content);
 
@@ -76,8 +77,16 @@ public class Main : Game
     protected override void LoadContent()
     {
         // TODO: use this.Content to load your game content here
-        Renderer.LoadContent();
+        BaseRenderer.LoadContent();
         Fonts.LoadContent();
+    }
+
+    protected override void BeginRun()
+    {
+        Actor.Initialize(new Player());
+        Actor.Initialize(new Player());
+
+        Actor.DoStart();
     }
 
     protected override void Update(GameTime gameTime)
@@ -94,9 +103,9 @@ public class Main : Game
             Exit();
 
         if(Input.GetPressed(Keys.OemPlus))
-            Renderer.PixelScale++;
+            BaseRenderer.PixelScale++;
         if(Input.GetPressed(Keys.OemMinus))
-            Renderer.PixelScale--;
+            BaseRenderer.PixelScale--;
 
         // TODO: Add your update logic here
 
@@ -118,17 +127,17 @@ public class Main : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        Renderer.BeginDraw(samplerState: SamplerState.PointClamp, transformMatrix: Camera.Transform);
+        BaseRenderer.BeginDraw(samplerState: SamplerState.PointClamp, transformMatrix: Camera.Transform);
 
 
-        Renderer.EndDraw();
-        Renderer.BeginDrawUI();
+        BaseRenderer.EndDraw();
+        BaseRenderer.BeginDrawUI();
 
-        Renderer.SpriteBatch.DrawStringSpacesFix(Fonts.Regular, "testing hi", new FPoint(1, 1).ToVector2(), Color.White, 6);
+        BaseRenderer.SpriteBatch.DrawStringSpacesFix(Fonts.Regular, "testing hi", new FPoint(1, 1).ToVector2(), Color.White, 6);
 
-        Renderer.EndDrawUI();
+        BaseRenderer.EndDrawUI();
 
-        Renderer.FinalizeDraw();
+        BaseRenderer.FinalizeDraw();
 
         base.Draw(gameTime);
     }

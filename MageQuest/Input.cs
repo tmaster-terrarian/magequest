@@ -23,20 +23,20 @@ public static class Input
     public static KeyboardState KeyboardState => currentKeyboardState;
 
     public static Point MousePosition => new(
-        Mouse.GetState().X / Renderer.PixelScale,
-        Mouse.GetState().Y / Renderer.PixelScale
+        Mouse.GetState().X / BaseRenderer.PixelScale,
+        Mouse.GetState().Y / BaseRenderer.PixelScale
     );
 
-    public static Point MousePositionClamped => MousePosition.Clamp(Point.Zero, new(Renderer.ScreenSize.X - 1, Renderer.ScreenSize.Y - 1));
+    public static Point MousePositionClamped => MousePosition.Clamp(Point.Zero, new(BaseRenderer.ScreenSize.X - 1, BaseRenderer.ScreenSize.Y - 1));
 
     public static Point GetMousePositionWithZoom(float zoom, bool clamp) => clamp
         ? new Point(
-            (int)MathHelper.Clamp(Mouse.GetState().X / Renderer.PixelScale / zoom, 0, Renderer.ScreenSize.X / zoom),
-            (int)MathHelper.Clamp(Mouse.GetState().Y / Renderer.PixelScale / zoom, 0, Renderer.ScreenSize.Y / zoom)
+            (int)MathHelper.Clamp(Mouse.GetState().X / BaseRenderer.PixelScale / zoom, 0, BaseRenderer.ScreenSize.X / zoom),
+            (int)MathHelper.Clamp(Mouse.GetState().Y / BaseRenderer.PixelScale / zoom, 0, BaseRenderer.ScreenSize.Y / zoom)
         )
         : new Point(
-            (int)(Mouse.GetState().X / (Renderer.PixelScale * zoom)),
-            (int)(Mouse.GetState().Y / (Renderer.PixelScale * zoom))
+            (int)(Mouse.GetState().X / (BaseRenderer.PixelScale * zoom)),
+            (int)(Mouse.GetState().Y / (BaseRenderer.PixelScale * zoom))
         );
 
     public static KeyboardState RefreshKeyboardState()

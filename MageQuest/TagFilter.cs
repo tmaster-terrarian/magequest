@@ -3,7 +3,7 @@ namespace MageQuest;
 public enum TagFilter
 {
     NoFiltering,
-    AtLeastOne,
+    One,
     All,
     None,
 }

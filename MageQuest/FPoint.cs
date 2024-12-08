@@ -22,8 +22,8 @@ public struct FPoint : IEquatable<FPoint>
     public static FPoint UnitX => unitXFPoint;
     public static FPoint UnitY => unitYFPoint;
 
-    public const int SHFT = Constants.SHFT;
-    public const int MULT = 0b1 << SHFT;
+    public const int SHFT = Consts.SHFT;
+    public const int MULT = Consts.MULT;
 
     [DataMember]
     [JsonInclude]
@@ -34,10 +34,10 @@ public struct FPoint : IEquatable<FPoint>
     public int Y;
 
     [JsonIgnore]
-    public readonly int XPixels => X >> SHFT;
+    public readonly int XPixels => X / MULT;
 
     [JsonIgnore]
-    public readonly int YPixels => Y >> SHFT;
+    public readonly int YPixels => Y / MULT;
 
     [JsonIgnore]
     internal readonly string DebugDisplayString => $"{XPixels}.{Math.Abs(X & 0x1FF)}  {YPixels}.{Math.Abs(Y & 0x1FF)}";

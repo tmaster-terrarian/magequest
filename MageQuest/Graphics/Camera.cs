@@ -12,15 +12,25 @@ public class Camera
     float currentShake;
     float shakeMagnitude;
     int shakeTime;
-    Point _lastMousePosInWorld;
+    FPoint _lastMousePosInWorld;
 
-    public Vector2 Position { get; set; } = Vector2.Zero;
+    static FPoint halfScreen = new(Consts.ScreenWidthPixels / 2, Consts.ScreenHeightPixels / 2);
+
+    public const int BaseFocusSpeed = 16;
+
+    public int FocusSpeed { get; set; } = BaseFocusSpeed;
+
+    public FPoint TargetPosition { get; set; }
+
+    public FPoint Position { get; set; }
+
+    public FPoint WorldOrigin { get; set; }
 
     public float Zoom { get; set; } = 1;
 
-    public Matrix Transform { get; private set; } = new();
+    public Matrix Transform { get; private set; }
 
-    public Point MousePositionInWorld => Input.InputDisabled ? _lastMousePosInWorld : Input.GetMousePositionWithZoom(Zoom, clamp: true) + Position.ToPoint();
+    public FPoint MousePositionInWorld => Input.InputDisabled ? _lastMousePosInWorld : Input.GetMousePositionWithZoom(Zoom, clamp: true) + Position;
 
     public void SetShake(float shakeMagnitude, int shakeTime)
     {
@@ -44,12 +54,33 @@ public class Camera
         if(!Input.InputDisabled)
             _lastMousePosInWorld = MousePositionInWorld;
 
-        Vector2 basePosition = Position;
+        var nextPos = Position;
 
-        Vector2 shakePosition = basePosition - new Vector2(
-            (Random.Shared.NextSingle() - 0.5f) * 2 * currentShake,
-            (Random.Shared.NextSingle() - 0.5f) * 2 * currentShake
-        );
+        if(Position != TargetPosition - halfScreen)
+        {
+            if(Math.Abs(TargetPosition.X - Position.X - halfScreen.X) < FocusSpeed)
+                nextPos.X = TargetPosition.X - halfScreen.X;
+            else
+                nextPos.X += (TargetPosition.X - Position.X - halfScreen.X) / FocusSpeed;
+
+            if(Math.Abs(TargetPosition.Y - Position.Y - halfScreen.X) < FocusSpeed)
+                nextPos.Y = TargetPosition.Y - halfScreen.Y;
+            else
+                nextPos.Y += (TargetPosition.Y - Position.Y - halfScreen.Y) / FocusSpeed;
+        }
+
+        Position = nextPos;
+
+        var basePosition = Vector2.Round((Position - WorldOrigin).ToVector2());
+
+        var shakePosition = basePosition;
+        if(currentShake != 0)
+        {
+            shakePosition -= new Vector2(
+                (Random.Shared.NextSingle() - 0.5f) * 2 * currentShake,
+                (Random.Shared.NextSingle() - 0.5f) * 2 * currentShake
+            );
+        }
 
         if(shakeTime > 0)
             currentShake = MathHelper.Max(0, currentShake - (1f / shakeTime * shakeMagnitude));
@@ -59,8 +90,8 @@ public class Camera
         if(currentShake == 0)
             shakeTime = 0;
 
-        Vector2 finalPosition = Vector2.Round(shakePosition);
+        var finalPosition = Vector2.Round(shakePosition);
 
-        Transform = Matrix.CreateTranslation(new Vector3(-finalPosition, 0)) * Matrix.CreateScale(Zoom);
+        Transform = Matrix.CreateTranslation(new(-finalPosition, 0)) * Matrix.CreateScale(Zoom);
     }
 }

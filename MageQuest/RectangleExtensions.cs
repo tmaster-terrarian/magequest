@@ -44,4 +44,9 @@ public static class RectangleExtensions
 
     public static Rectangle ScalePosition(this Rectangle rectangle, int scale) => ScalePosition(rectangle, new Point(scale, scale));
     public static Rectangle ScalePosition(this Rectangle rectangle, float scale) => ScalePosition(rectangle, Vector2.One * scale);
+
+    public static FRectangle ToFRectangle(this Rectangle rectangle)
+    {
+        return new(rectangle.Location, rectangle.Size);
+    }
 }

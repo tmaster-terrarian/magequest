@@ -52,6 +52,11 @@ public static class BaseRenderer
     /// </summary>
     public static Texture2D PixelTexture { get; private set; }
 
+    /// <summary>
+    /// Represents an outline for use in debug drawing.
+    /// </summary>
+    public static Texture2D OutlineTexture { get; private set; }
+
     public static GraphicsDeviceManager GetDefaultGraphicsDeviceManager(Game game) => new(game)
     {
         PreferMultiSampling = false,
@@ -83,13 +88,20 @@ public static class BaseRenderer
         PixelTexture = new Texture2D(GraphicsDevice, 1, 1);
         PixelTexture.SetData([Color.White]);
 
+        OutlineTexture = new Texture2D(GraphicsDevice, 3, 3);
+        OutlineTexture.SetData([
+            Color.White,        Color.White,        Color.White,
+            Color.White,        Color.Transparent,  Color.White,
+            Color.White,        Color.White,        Color.White
+        ]);
+
         Window.Position = new((GraphicsDevice.DisplayMode.Width - _graphics.PreferredBackBufferWidth) / 2, (GraphicsDevice.DisplayMode.Height - _graphics.PreferredBackBufferHeight) / 2);
 
-        if(GraphicsDevice.DisplayMode.Height == _graphics.PreferredBackBufferHeight)
-        {
-            Window.Position = Point.Zero;
-            Window.IsBorderless = true;
-        }
+        // if(GraphicsDevice.DisplayMode.Height == _graphics.PreferredBackBufferHeight)
+        // {
+        //     Window.Position = Point.Zero;
+        //     Window.IsBorderless = true;
+        // }
 
         _graphics.ApplyChanges();
 
@@ -121,15 +133,15 @@ public static class BaseRenderer
 
             Window.Position = new((GraphicsDevice.DisplayMode.Width - _graphics.PreferredBackBufferWidth) / 2, (GraphicsDevice.DisplayMode.Height - _graphics.PreferredBackBufferHeight) / 2);
 
-            if(GraphicsDevice.DisplayMode.Height == _graphics.PreferredBackBufferHeight)
-            {
-                Window.Position = Point.Zero;
-                Window.IsBorderless = true;
-            }
-            else if(Window.IsBorderless)
-            {
-                Window.IsBorderless = false;
-            }
+            // if(GraphicsDevice.DisplayMode.Height == _graphics.PreferredBackBufferHeight)
+            // {
+            //     Window.Position = Point.Zero;
+            //     Window.IsBorderless = true;
+            // }
+            // else if(Window.IsBorderless)
+            // {
+            //     Window.IsBorderless = false;
+            // }
 
             _graphics.ApplyChanges();
         }

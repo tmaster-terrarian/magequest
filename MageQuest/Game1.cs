@@ -14,20 +14,18 @@ public class Main : Game
 {
     private static GraphicsDeviceManager _graphics;
 
-    private static Camera camera;
-
-    public static Camera Camera => camera;
+    public static Camera Camera  { get; private set; }
 
     public static bool Paused { get; set; }
 
     public static Logger Logger { get; set; } = new("main");
 
     public static CoroutineRunner GlobalCoroutines { get; } = new();
-    public static CoroutineRunner LevelCoroutines { get; } = new();
+    public static CoroutineRunner LevelCoroutines { get; private set; } = new();
 
     public Main()
     {
-        BaseRenderer.ScreenSize = new Point(320, 240);
+        BaseRenderer.ScreenSize = new Point(Consts.ScreenWidthPixels, Consts.ScreenHeightPixels);
         _graphics = BaseRenderer.GetDefaultGraphicsDeviceManager(this);
 
         Content.RootDirectory = "data";
@@ -67,7 +65,7 @@ public class Main : Game
 
         ContentLoader.Initialize(Content);
 
-        camera = new();
+        Camera = new();
 
         Exiting += Game_Exiting;
 
@@ -84,6 +82,14 @@ public class Main : Game
     protected override void BeginRun()
     {
         var player = Actor.Initialize(new Player());
+
+        var solid = Actor.Initialize(new SolidBox {
+            Hitbox = new(
+                new FPoint(0, 32),
+                new FPoint(512, 16)
+            ),
+            Tag = new((uint)ActorTags.PlayerCollidable)
+        });
 
         Actor.DoStart();
     }
@@ -106,11 +112,9 @@ public class Main : Game
         if(Input.GetPressed(Keys.OemMinus))
             BaseRenderer.PixelScale--;
 
-        // TODO: Add your update logic here
+        GlobalCoroutines.Update();
 
         UpdatePausables();
-
-        GlobalCoroutines.Update();
 
         base.Update(gameTime);
     }
@@ -119,26 +123,29 @@ public class Main : Game
     {
         if(Paused) return;
 
-        LevelCoroutines.Update();
+        LevelCoroutines?.Update();
 
         Actor.DoUpdate();
+
+        Camera.Update();
 
         // TODO: Add your update logic here
     }
 
     protected override void Draw(GameTime gameTime)
     {
-        BaseRenderer.BeginDraw(samplerState: SamplerState.PointClamp, transformMatrix: Camera.Transform);
+        BaseRenderer.BeginDraw(samplerState: SamplerState.PointClamp, transformMatrix: Camera.Transform, blendState: BlendState.AlphaBlend);
 
         Actor.DoDraw();
 
         BaseRenderer.EndDraw();
         BaseRenderer.BeginDrawUI();
 
+        Actor.DoDrawUI();
+
         BaseRenderer.SpriteBatch.DrawStringSpacesFix(Fonts.Regular, "testing hi", new FPoint(1, 1).ToVector2(), Color.White, 6);
 
         BaseRenderer.EndDrawUI();
-
         BaseRenderer.FinalizeDraw();
 
         base.Draw(gameTime);

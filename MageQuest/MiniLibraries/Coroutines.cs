@@ -75,7 +75,12 @@ public class CoroutineRunner
     /// <summary>
     /// Stop all running routines.
     /// </summary>
-    public void StopAll() => _coroutines.Clear();
+    public void StopAll()
+    {
+        if(running)
+            return;
+        _coroutines.Clear();
+    }
 
     /// <summary>
     /// Check if the routine is currently running.
@@ -92,9 +97,9 @@ public class CoroutineRunner
 
         if(_toAdd.Count > 0)
         {
-            foreach(var coroutine in _toAdd.Values)
+            foreach(var item in _toAdd)
             {
-                _coroutines.Add(coroutine.MethodName, coroutine);
+                _coroutines.Add(item.Key, item.Value);
             }
             _toAdd.Clear();
         }

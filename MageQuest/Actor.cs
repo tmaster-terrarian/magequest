@@ -13,6 +13,27 @@ public class Actor : IDisposable
 
     private static bool _locked = false;
 
+    private static Comparison<Actor> CompareDepth => (a, b) => Math.Sign(b.Depth - a.Depth);
+
+    private static List<Actor> ToDraw
+    {
+        get
+        {
+            if(!_drawOrderDirty) return toDraw;
+
+            toDraw = [..actors];
+            toDraw.Sort(CompareDepth);
+
+            _drawOrderDirty = false;
+
+            return toDraw;
+        }
+    }
+
+    private static bool _drawOrderDirty = true;
+
+    private static List<Actor> toDraw;
+
     public static void DoStart()
     {
         // as a for loop it can naturally expand, since the list
@@ -43,6 +64,7 @@ public class Actor : IDisposable
             actor.Dispose();
         }
 
+        toDraw.Clear();
         solids.Clear();
         actors.Clear();
 
@@ -57,13 +79,14 @@ public class Actor : IDisposable
         foreach(var actor in actors)
         {
             if(!actor.Enabled) continue;
+
             actor.Update();
         }
     }
 
     public static void DoDraw()
     {
-        foreach(var actor in actors)
+        foreach(var actor in ToDraw)
         {
             if(!actor.Enabled) continue;
             actor.Draw();
@@ -72,7 +95,7 @@ public class Actor : IDisposable
 
     public static void DoDrawUI()
     {
-        foreach(var actor in actors)
+        foreach(var actor in ToDraw)
         {
             if(!actor.Enabled) continue;
             actor.DrawUI();
@@ -170,7 +193,9 @@ public class Actor : IDisposable
 
     private int _index;
 
-    private FRectangle hitbox;
+    private int _depth;
+
+    private FRectangle _hitbox;
 
     public event Action Disposed;
 
@@ -178,17 +203,28 @@ public class Actor : IDisposable
 
     public Tag Tag { get; set; }
 
-    public FRectangle Hitbox { get => hitbox; set => hitbox = value; }
+    public FRectangle Hitbox { get => _hitbox; set => _hitbox = value; }
 
-    public FPoint Position { get => hitbox.Location; set => hitbox.Location = value; }
-    public int X { get => hitbox.X; set => hitbox.X = value; }
-    public int Y { get => hitbox.Y; set => hitbox.Y = value; }
+    public FPoint Position { get => _hitbox.Location; set => _hitbox.Location = value; }
+    public int X { get => _hitbox.X; set => _hitbox.X = value; }
+    public int Y { get => _hitbox.Y; set => _hitbox.Y = value; }
 
-    public FPoint Size { get => hitbox.Size; set => hitbox.Size = value; }
-    public int Width { get => hitbox.Width; set => hitbox.Width = value; }
-    public int Height { get => hitbox.Height; set => hitbox.Height = value; }
+    public FPoint Size { get => _hitbox.Size; set => _hitbox.Size = value; }
+    public int Width { get => _hitbox.Width; set => _hitbox.Width = value; }
+    public int Height { get => _hitbox.Height; set => _hitbox.Height = value; }
 
     public bool OnGround { get; protected set; }
+
+    public int Depth {
+        get => _depth;
+        set {
+            if(_depth != value)
+            {
+                _depth = value;
+                _drawOrderDirty = true;
+            }
+        }
+    }
 
     public bool Enabled {
         get => _enabled;
@@ -253,17 +289,17 @@ public class Actor : IDisposable
                 if(col1 && !CheckColliding(sign, -1))
                 {
                     // slope up
-                    hitbox.X += sign;
-                    hitbox.Y -= 1;
+                    _hitbox.X += sign;
+                    _hitbox.Y -= 1;
                     move -= sign;
                 }
                 else if(!col1)
                 {
                     // slope down
                     if(!CheckColliding(sign, 1) && CheckColliding(sign, 2))
-                        hitbox.Y += 1;
+                        _hitbox.Y += 1;
 
-                    hitbox.X += sign;
+                    _hitbox.X += sign;
                     move -= sign;
                 }
                 else
@@ -284,7 +320,7 @@ public class Actor : IDisposable
             {
                 if(!CheckColliding(0, sign))
                 {
-                    hitbox.Y += sign;
+                    _hitbox.Y += sign;
                     move -= sign;
                     continue;
                 }

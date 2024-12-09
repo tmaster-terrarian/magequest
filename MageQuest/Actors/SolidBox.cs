@@ -7,6 +7,18 @@ public class SolidBox : Solid
 {
     protected override void Draw()
     {
+        Color colorDark = ColorUtil.CreateFromHex(0x24213d);
+        Color colorLight = ColorUtil.CreateFromHex(0x76428a);
+
+        var expandedHitbox = Hitbox.ToRectangle();
+        expandedHitbox.Inflate(1, 1);
+
+        BaseRenderer.SpriteBatch.Draw(
+            BaseRenderer.PixelTexture,
+            expandedHitbox,
+            colorDark
+        );
+
         const int cellSize = 8;
 
         int cellsY = Hitbox.HeightPixels / cellSize;
@@ -16,9 +28,6 @@ public class SolidBox : Solid
 
         int yExtra = (Hitbox.HeightPixels > cellsY * cellSize).ToInt32();
         int xExtra = (Hitbox.WidthPixels > cellsX * cellSize).ToInt32();
-
-        Color colorDark = ColorUtil.CreateFromHex(0x24213d);
-        Color colorLight = ColorUtil.CreateFromHex(0x76428a);
 
         bool alternator = true;
         for(int y = 0; y < cellsY + yExtra; y++)
@@ -45,7 +54,7 @@ public class SolidBox : Solid
             null,
             new Point(1),
             new Point(1),
-            Color.Red
+            ColorUtil.CreateFromHex(0xd77bba)
         );
     }
 

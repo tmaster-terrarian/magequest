@@ -34,10 +34,10 @@ public struct FPoint : IEquatable<FPoint>
     public int Y;
 
     [JsonIgnore]
-    public readonly int XPixels => X / MULT;
+    public readonly int XPixels => X >> SHFT;
 
     [JsonIgnore]
-    public readonly int YPixels => Y / MULT;
+    public readonly int YPixels => Y >> SHFT;
 
     [JsonIgnore]
     internal readonly string DebugDisplayString => $"{XPixels}.{Math.Abs(X & 0x1FF)}  {YPixels}.{Math.Abs(Y & 0x1FF)}";

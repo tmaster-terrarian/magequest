@@ -3,6 +3,7 @@ using System.Collections;
 using MageQuest.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace MageQuest.Actors;
 
@@ -30,9 +31,10 @@ public class Player : Actor
 
     SpriteEffects SpriteEffects => Facing == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
 
-    Texture2D mainTexture;
-    Texture2D staffTexture;
-    Texture2D staffEyeTexture;
+    Func<Texture2D> mainTexture;
+    Func<Texture2D> staffTexture;
+    Func<Texture2D> staffEyeTexture;
+
     FPoint drawOffset;
     int frameX = 0;
     int frameY = 0;
@@ -41,9 +43,9 @@ public class Player : Actor
     int staffEyeFrameX = 0;
     int staffEyeFrameY = 0;
 
-    Animations anim;
-    StaffAnimations staffAnim;
-    StaffAnimations staffEyeAnim;
+    Animations anim = Animations.none;
+    StaffAnimations staffAnim = StaffAnimations.none;
+    StaffAnimations staffEyeAnim = StaffAnimations.none;
 
     int walkFrameCounter;
     int walkFrame;
@@ -58,9 +60,9 @@ public class Player : Actor
 
     protected override void PreStart()
     {
-        mainTexture = ContentLoader.Load<Texture2D>("graphics/gameplay/entities/player/player");
-        staffTexture = ContentLoader.Load<Texture2D>("graphics/gameplay/entities/player/staff");
-        staffEyeTexture = ContentLoader.Load<Texture2D>("graphics/gameplay/entities/player/staff_eye");
+        mainTexture = () => ContentLoader.Load<Texture2D>("graphics/gameplay/entities/player/player");
+        staffTexture = () => ContentLoader.Load<Texture2D>("graphics/gameplay/entities/player/staff");
+        staffEyeTexture = () => ContentLoader.Load<Texture2D>("graphics/gameplay/entities/player/staff_eye");
 
         Size = new(8, 14);
 
@@ -141,7 +143,13 @@ public class Player : Actor
         }
         else
         {
-            frameX = _lookDir;
+            walkFrame = vel.Y > 0 ? 1 : 3;
+
+            frameX = _lookDir + (walkFrame switch {
+                1 => 1,
+                3 => 2,
+                _ => 0,
+            });
 
             vel.Y += PlayerData.Config.Keybinds.Jump.IsDown && vel.Y <= 0
                 ? JumpingGravity
@@ -204,18 +212,24 @@ public class Player : Actor
         MoveY(vel.Y, () => vel.Y = 0);
         MoveX(vel.X, () => vel.X = 0);
 
+        if(Input.GetPressed(Keys.R))
+        {
+            if(!Main.GlobalCoroutines.IsRunning("fade"))
+                Main.GlobalCoroutines.Run("fade", ResetPositionAndFade());
+        }
+
         Main.Camera.TargetPosition = new(
             X + camDistanceX + 0x800,
             Y + camDistanceY + 0xC00,
             false
         );
 
-        if(Main.Frame % 300 == 0 && staffAnim == StaffAnimations.none)
+        if((Main.Frame % 300 == 0 || Input.GetPressed(Keys.N)) && staffAnim == StaffAnimations.none)
         {
             PlayStaffAnimation(StaffAnimations.flutter, StaffAnimFlutter);
         }
 
-        if(Random.Shared.NextSingle() < 0.002f && staffEyeAnim == StaffAnimations.none)
+        if((Random.Shared.NextSingle() < 0.002f || Input.GetPressed(Keys.B)) && staffEyeAnim == StaffAnimations.none)
         {
             PlayStaffAnimation(StaffAnimations.eye_blink, StaffAnimBlink);
         }
@@ -254,10 +268,17 @@ public class Player : Actor
     {
         FPoint texPos = new(4, 6);
 
-        FPoint staffPos = texPos + new FPoint(7 * Facing, -4);
+        FPoint staffPos = texPos + new FPoint(
+            (7 + (walkFrame switch {
+                1 => -1,
+                3 => 1,
+                _ => 0,
+            })) * Facing,
+            -4 + lookDir
+        );
 
         BaseRenderer.SpriteBatch.Draw(
-            mainTexture,
+            mainTexture(),
             (Position + texPos + drawOffset).ToPoint().ToVector2(),
             new Rectangle(frameX * 16, frameY * 16, 16, 16),
             Color.White,
@@ -269,7 +290,7 @@ public class Player : Actor
         );
 
         BaseRenderer.SpriteBatch.Draw(
-            staffTexture,
+            staffTexture(),
             (Position + staffPos + drawOffset).ToPoint().ToVector2(),
             new Rectangle(staffFrameX * 16, staffFrameY * 16, 16, 16),
             Color.White,
@@ -280,7 +301,7 @@ public class Player : Actor
             0
         );
         BaseRenderer.SpriteBatch.Draw(
-            staffEyeTexture,
+            staffEyeTexture(),
             (Position + staffPos + drawOffset).ToPoint().ToVector2(),
             new Rectangle(staffEyeFrameX * 16, staffEyeFrameY * 16, 16, 16),
             Color.White,
@@ -290,6 +311,8 @@ public class Player : Actor
             SpriteEffects,
             0
         );
+
+        #if DEBUG
 
         BaseRenderer.SpriteBatch.Draw(
             BaseRenderer.PixelTexture,
@@ -327,10 +350,14 @@ public class Player : Actor
         //     Position.ToPoint().ToVector2(),
         //     Color.Yellow
         // );
+
+        #endif
     }
 
     protected override void DrawUI()
     {
+        #if DEBUG
+
         BaseRenderer.SpriteBatch.DrawStringSpacesFix(
             Fonts.Regular,
             vel.ToString(),
@@ -345,6 +372,8 @@ public class Player : Actor
             Color.White,
             6
         );
+
+        #endif
     }
 
     IEnumerator StaffAnimBlink()
@@ -379,5 +408,29 @@ public class Player : Actor
         yield return frameTime;
 
         staffAnim = StaffAnimations.none;
+    }
+
+    IEnumerator ResetPositionAndFade()
+    {
+        var fadeOut = ScreenFade.FadeOut();
+        while(fadeOut.MoveNext())
+        {
+            yield return null;
+        }
+        ScreenFade.SetState(ScreenFade.TransitionStates.IdleOut);
+
+        Position = new(0, 50);
+        Velocity = FPoint.Zero;
+        Main.Camera.Position = new(
+            X + camDistanceX + 0x800,
+            Y + camDistanceY + 0xC00,
+            false
+        );
+
+        var fadeIn = ScreenFade.FadeIn();
+        while(fadeIn.MoveNext())
+        {
+            yield return null;
+        }
     }
 }

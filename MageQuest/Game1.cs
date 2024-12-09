@@ -5,8 +5,11 @@ using MageQuest.Graphics;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGameReload;
+using MonoGameReload.Assets;
 
 namespace MageQuest;
 
@@ -66,6 +69,9 @@ public class Main : Game
         _graphics.PreferredBackBufferHeight = BaseRenderer.ScreenSize.Y * BaseRenderer.PixelScale;
         BaseRenderer.Initialize(_graphics, GraphicsDevice, Window);
 
+        ContentReloader.Initialize(Content, GraphicsDevice, TargetPlatform.DesktopGL);
+        ContentReloader.FileWatcher.IgnoreType = ~AssetType.Texture;
+
         ContentLoader.Initialize(Content);
 
         Camera = new();
@@ -80,6 +86,7 @@ public class Main : Game
         // TODO: use this.Content to load your game content here
         BaseRenderer.LoadContent();
         Fonts.LoadContent();
+        ScreenFade.LoadContent();
     }
 
     protected override void BeginRun()
@@ -93,6 +100,7 @@ public class Main : Game
                 new FPoint(0, 64),
                 new FPoint(512, 16)
             ),
+            Depth = 50,
             Tag = new((uint)ActorTags.PlayerCollidable)
         });
         Actor.Initialize(new SolidBox {
@@ -100,6 +108,7 @@ public class Main : Game
                 new FPoint(64, 16),
                 new FPoint(32, 16)
             ),
+            Depth = 50,
             Tag = new((uint)ActorTags.PlayerCollidable)
         });
 
@@ -116,8 +125,8 @@ public class Main : Game
 
         Input.UpdateTypingInput(gameTime);
 
-        if(PlayerData.Config.Keybinds.Pause.Pressed)
-            Exit();
+        // if(PlayerData.Config.Keybinds.Pause.Pressed)
+        //     Exit();
 
         if(Input.GetPressed(Keys.OemPlus))
             BaseRenderer.PixelScale++;
@@ -127,6 +136,14 @@ public class Main : Game
         GlobalCoroutines.Update();
 
         UpdatePausables();
+
+        if(Input.GetPressed(Keys.F))
+        {
+            if(!GlobalCoroutines.IsRunning("fade"))
+                GlobalCoroutines.Run("fade", ScreenFade.FadeInOut());
+        }
+
+        ScreenFade.Update();
 
         GlobalFrame++;
 
@@ -156,6 +173,8 @@ public class Main : Game
         BaseRenderer.BeginDrawUI();
 
         Actor.DoDrawUI();
+
+        ScreenFade.DrawUI();
 
         BaseRenderer.SpriteBatch.DrawStringSpacesFix(Fonts.Regular, "testing hi", new FPoint(1, 1).ToVector2(), Color.White, 6);
 

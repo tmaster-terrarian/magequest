@@ -1,3 +1,4 @@
+using System;
 using MageQuest.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -45,18 +46,10 @@ public class Player : Actor
         Hitbox = new(0, 0, 8, 14);
 
         collisionMask = Tag.Add(collisionMask, (uint)ActorTags.PlayerCollidable);
-
-        Main.Logger.LogInfo(collisionMask);
     }
 
     protected override void Update()
     {
-        Main.Camera.TargetPosition = new(
-            camDistanceX + 4,
-            6,
-            false
-        );
-
         moveDir = PlayerData.Config.Keybinds.Right.IsDown.ToInt32() - PlayerData.Config.Keybinds.Left.IsDown.ToInt32();
         lookDir = PlayerData.Config.Keybinds.Down.IsDown.ToInt32() - PlayerData.Config.Keybinds.Up.IsDown.ToInt32();
 
@@ -136,7 +129,11 @@ public class Player : Actor
         vel.Y = MathHelper.Min(vel.Y, MaxFallingSpeed);
         vel.X = MathHelper.Clamp(vel.X, -MaxWalkingSpeed, MaxWalkingSpeed);
 
-        Main.Camera.WorldOrigin = -Hitbox.Location;
+        Main.Camera.TargetPosition = new(
+            Hitbox.X + camDistanceX + (4 << Consts.SHFT),
+            Hitbox.Y + (6 << Consts.SHFT),
+            false
+        );
 
         MoveY(vel.Y, () => vel.Y = 0);
         MoveX(vel.X, () => vel.X = 0);
@@ -161,14 +158,36 @@ public class Player : Actor
             0
         );
 
-        // BaseRenderer.SpriteBatch.DrawNineSlice(
-        //     BaseRenderer.OutlineTexture,
-        //     Hitbox.ToRectangle(),
-        //     null,
-        //     new Point(1),
-        //     new Point(1),
-        //     Color.Red
-        // );
+        BaseRenderer.SpriteBatch.Draw(
+            BaseRenderer.PixelTexture,
+            new FRectangle(
+                new(
+                    Main.Camera.Position.X - Main.Camera.Deadzone.X,
+                    Main.Camera.Position.Y - Main.Camera.Deadzone.Y,
+                    false
+                ),
+                new(
+                    MathHelper.Max(0x200, Main.Camera.Deadzone.X + Main.Camera.Deadzone.Width),
+                    MathHelper.Max(0x200, Main.Camera.Deadzone.Y + Main.Camera.Deadzone.Height),
+                    false
+                )
+            ).ToRectangle(),
+            Color.LightPink * 0.5f
+        );
+
+        BaseRenderer.SpriteBatch.DrawLine(
+            new FPoint(
+                Main.Camera.Position.X,
+                Main.Camera.Position.Y,
+                false
+            ).ToVector2(),
+            new FPoint(
+                Main.Camera.TargetPosition.X,
+                Main.Camera.TargetPosition.Y,
+                false
+            ).ToVector2(),
+            Color.Yellow
+        );
 
         // BaseRenderer.SpriteBatch.Draw(
         //     BaseRenderer.PixelTexture,

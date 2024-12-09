@@ -33,14 +33,6 @@ public struct Tag(uint bitmask) : IEquatable<Tag>
 
     public readonly bool Matches(Tag other, TagFilter filter) => Matches(this, other, filter);
 
-    public void Add(Tag tag) => Bitmask |= tag.Bitmask;
-
-    public void Add(uint tag) => Bitmask |= tag;
-
-    public void Remove(Tag tag) => Bitmask &= ~tag.Bitmask;
-
-    public void Remove(uint tag) => Bitmask &= ~tag;
-
     public static Tag Add(Tag tag, Tag value) => tag with {Bitmask = tag.Bitmask | value.Bitmask};
 
     public static Tag Add(Tag tag, uint value) => tag with {Bitmask = tag.Bitmask | value};

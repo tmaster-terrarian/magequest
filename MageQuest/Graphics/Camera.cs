@@ -14,7 +14,9 @@ public class Camera
     int shakeTime;
     FPoint _lastMousePosInWorld;
 
-    static FPoint halfScreen = new(Consts.ScreenWidthPixels / 2, Consts.ScreenHeightPixels / 2);
+    static readonly FPoint halfScreen = new(Consts.ScreenWidthPixels / 2, Consts.ScreenHeightPixels / 2);
+
+    public static FPoint HalfScreen => halfScreen;
 
     public const int BaseFocusSpeed = 16;
 
@@ -24,13 +26,13 @@ public class Camera
 
     public FPoint Position { get; set; }
 
-    public FPoint WorldOrigin { get; set; }
-
     public float Zoom { get; set; } = 1;
 
     public Matrix Transform { get; private set; }
 
     public FPoint MousePositionInWorld => Input.InputDisabled ? _lastMousePosInWorld : Input.GetMousePositionWithZoom(Zoom, clamp: true) + Position;
+
+    public FRectangle Deadzone { get; set; } = new(12, 32, 12, 8);
 
     public void SetShake(float shakeMagnitude, int shakeTime)
     {
@@ -55,23 +57,34 @@ public class Camera
             _lastMousePosInWorld = MousePositionInWorld;
 
         var nextPos = Position;
+        var targetPos = TargetPosition;
 
-        if(Position != TargetPosition - halfScreen)
+        // nextPos.Y = MathHelper.Clamp(targetPos.Y, -Deadzone.Y, Deadzone.Height);
+        // nextPos.X = MathHelper.Clamp(targetPos.X, -Deadzone.X, Deadzone.Width);
+
+        if(targetPos.Y < Position.Y - Deadzone.Y)
         {
-            if(Math.Abs(TargetPosition.X - Position.X - halfScreen.X) < FocusSpeed)
-                nextPos.X = TargetPosition.X - halfScreen.X;
-            else
-                nextPos.X += (TargetPosition.X - Position.X - halfScreen.X) / FocusSpeed;
+            nextPos.Y = targetPos.Y + Deadzone.Y;
+        }
 
-            if(Math.Abs(TargetPosition.Y - Position.Y - halfScreen.X) < FocusSpeed)
-                nextPos.Y = TargetPosition.Y - halfScreen.Y;
-            else
-                nextPos.Y += (TargetPosition.Y - Position.Y - halfScreen.Y) / FocusSpeed;
+        if(targetPos.Y > Position.Y + Deadzone.Height)
+        {
+            nextPos.Y = targetPos.Y - Deadzone.Height;
+        }
+
+        if(targetPos.X < Position.X - Deadzone.X)
+        {
+            nextPos.X = targetPos.X + Deadzone.X;
+        }
+
+        if(targetPos.X > Position.X + Deadzone.Width)
+        {
+            nextPos.X = targetPos.X - Deadzone.Width;
         }
 
         Position = nextPos;
 
-        var basePosition = Vector2.Round((Position - WorldOrigin).ToVector2());
+        var basePosition = Vector2.Round((Position - halfScreen).ToVector2());
 
         var shakePosition = basePosition;
         if(currentShake != 0)

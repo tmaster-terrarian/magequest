@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using MageQuest.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -21,41 +22,66 @@ public class Player : Actor
     public const int AirAccel = 0x20;
     public const int Fric = 0x33;
 
+    enum Animations { none }
+
+    enum StaffAnimations { none, flutter, eye_blink }
+
     public int Facing { get; private set; } = 1;
 
     SpriteEffects SpriteEffects => Facing == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
 
-    Texture2D _mainTexture;
-    Point drawOffset;
-    int frameX;
-    int frameY;
-    int lookDir;
+    Texture2D mainTexture;
+    Texture2D staffTexture;
+    Texture2D staffEyeTexture;
+    FPoint drawOffset;
+    int frameX = 0;
+    int frameY = 0;
+    int staffFrameX = 0;
+    int staffFrameY = 0;
+    int staffEyeFrameX = 0;
+    int staffEyeFrameY = 0;
+
+    Animations anim;
+    StaffAnimations staffAnim;
+    StaffAnimations staffEyeAnim;
 
     int walkFrameCounter;
     int walkFrame;
-    int moveDir;
 
-    int camDistanceX;
+    int moveDir;
+    int lookDir;
+
+    int camDistanceX = 0;
+    int camDistanceY = 0;
 
     Tag collisionMask = new();
 
     protected override void PreStart()
     {
-        _mainTexture = ContentLoader.Load<Texture2D>("graphics/gameplay/entities/player/player");
+        mainTexture = ContentLoader.Load<Texture2D>("graphics/gameplay/entities/player/player");
+        staffTexture = ContentLoader.Load<Texture2D>("graphics/gameplay/entities/player/staff");
+        staffEyeTexture = ContentLoader.Load<Texture2D>("graphics/gameplay/entities/player/staff_eye");
 
-        Hitbox = new(0, 0, 8, 14);
+        Size = new(8, 14);
 
         collisionMask = Tag.Add(collisionMask, (uint)ActorTags.PlayerCollidable);
+
+        Main.Camera.TargetPosition = new(
+            X + (4 << Consts.SHFT),
+            Y + (6 << Consts.SHFT),
+            false
+        );
+        Main.Camera.Position = Main.Camera.TargetPosition;
     }
 
     protected override void Update()
     {
+        int lastLookDir = lookDir;
+
         moveDir = PlayerData.Config.Keybinds.Right.IsDown.ToInt32() - PlayerData.Config.Keybinds.Left.IsDown.ToInt32();
         lookDir = PlayerData.Config.Keybinds.Down.IsDown.ToInt32() - PlayerData.Config.Keybinds.Up.IsDown.ToInt32();
 
         OnGround = CheckColliding(0, 1, collisionMask, TagFilter.One);
-
-        drawOffset = Point.Zero;
 
         if(moveDir == 1)
         {
@@ -63,7 +89,7 @@ public class Player : Actor
 
             vel.X += OnGround ? GroundAccel : AirAccel;
 
-            camDistanceX = MathHelper.Min(camDistanceX + 0x180, 0x6000);
+            camDistanceX += (0x6000 - camDistanceX) / 0x38;
         }
         else if(moveDir == -1)
         {
@@ -71,7 +97,7 @@ public class Player : Actor
 
             vel.X -= OnGround ? GroundAccel : AirAccel;
 
-            camDistanceX = MathHelper.Max(camDistanceX - 0x180, -0x6000);
+            camDistanceX += (-0x6000 - camDistanceX) / 0x38;
         }
 
         if(moveDir != 0)
@@ -85,7 +111,7 @@ public class Player : Actor
         }
         else
         {
-            camDistanceX = MathUtil.Approach(camDistanceX, 0, 0x80);
+            camDistanceX += -camDistanceX / 0x30;
 
             walkFrameCounter = 0;
             walkFrame = 0;
@@ -107,15 +133,11 @@ public class Player : Actor
                 3 => 2,
                 _ => 0,
             });
+
             drawOffset.Y = walkFrame switch {
                 1 or 3 => -1,
                 _ => 0,
-            };
-
-            if(PlayerData.Config.Keybinds.Jump.Pressed)
-            {
-                vel.Y = -JumpingSpeed;
-            }
+            } << Consts.SHFT;
         }
         else
         {
@@ -126,17 +148,77 @@ public class Player : Actor
                 : Gravity;
         }
 
+        if(PlayerData.Config.Keybinds.Jump.Pressed)
+        {
+            if(OnGround)
+            {
+                vel.Y = -JumpingSpeed;
+            }
+        }
+
+        // if(lookDir != 0)
+        // {
+        //     if(lastLookDir == 0)
+        //     {
+        //         if(lookDir == 1)
+        //         {
+        //             camDistanceY = Main.Camera.Deadzone.Height;
+        //         }
+        //         else
+        //         {
+        //             camDistanceY = -Main.Camera.Deadzone.Y;
+        //         }
+
+        //         camDistanceY += Main.Camera.Position.Y - (Y + 0xC00);
+        //     }
+
+        //     camDistanceY += ((lookDir * 0x10000) - camDistanceY) / 0x30;
+        // }
+        // else
+        // {
+        //     if(lastLookDir != 0)
+        //     {
+        //         if(lastLookDir == 1)
+        //         {
+        //             camDistanceY = -Main.Camera.Deadzone.Y;
+        //         }
+        //         else
+        //         {
+        //             camDistanceY = Main.Camera.Deadzone.Height;
+        //         }
+
+        //         camDistanceY += Main.Camera.Position.Y - (Y + 0xC00);
+        //     }
+
+        //     camDistanceY += -camDistanceY / 0x40;
+
+        //     if(Math.Abs(camDistanceY) > 0x1000)
+        //     {
+        //         Main.Camera.Position += new FPoint(0, (camDistanceY + Y + 0xC00 - Main.Camera.Position.Y) / 0x40, false);
+        //     }
+        // }
+
         vel.Y = MathHelper.Min(vel.Y, MaxFallingSpeed);
         vel.X = MathHelper.Clamp(vel.X, -MaxWalkingSpeed, MaxWalkingSpeed);
 
+        MoveY(vel.Y, () => vel.Y = 0);
+        MoveX(vel.X, () => vel.X = 0);
+
         Main.Camera.TargetPosition = new(
-            Hitbox.X + camDistanceX + (4 << Consts.SHFT),
-            Hitbox.Y + (6 << Consts.SHFT),
+            X + camDistanceX + 0x800,
+            Y + camDistanceY + 0xC00,
             false
         );
 
-        MoveY(vel.Y, () => vel.Y = 0);
-        MoveX(vel.X, () => vel.X = 0);
+        if(Main.Frame % 300 == 0 && staffAnim == StaffAnimations.none)
+        {
+            PlayStaffAnimation(StaffAnimations.flutter, StaffAnimFlutter);
+        }
+
+        if(Random.Shared.NextSingle() < 0.002f && staffEyeAnim == StaffAnimations.none)
+        {
+            PlayStaffAnimation(StaffAnimations.eye_blink, StaffAnimBlink);
+        }
     }
 
     protected override bool CheckColliding(int offsetX, int offsetY, Tag matchTags = default, TagFilter filter = TagFilter.NoFiltering)
@@ -144,12 +226,63 @@ public class Player : Actor
         return SolidMeeting(Hitbox.Shift(offsetX, offsetY), matchTags, filter);
     }
 
+    private void PlayAnimation(Animations animId, Func<IEnumerator> func, bool force = false)
+    {
+        var name = $"playerAnimation_{animId}";
+        if(!Main.LevelCoroutines.IsRunning(name) || force)
+        {
+            if(force)
+                Main.LevelCoroutines.Stop(name);
+
+            Main.LevelCoroutines.Run(name, func());
+        }
+    }
+
+    private void PlayStaffAnimation(StaffAnimations animId, Func<IEnumerator> func, bool force = false)
+    {
+        var name = $"playerAnimation_staff_{animId}";
+        if(!Main.LevelCoroutines.IsRunning(name) || force)
+        {
+            if(force)
+                Main.LevelCoroutines.Stop(name);
+
+            Main.LevelCoroutines.Run(name, func());
+        }
+    }
+
     protected override void Draw()
     {
+        FPoint texPos = new(4, 6);
+
+        FPoint staffPos = texPos + new FPoint(7 * Facing, -4);
+
         BaseRenderer.SpriteBatch.Draw(
-            _mainTexture,
-            (Hitbox.Location.ToPoint() + new Point(4, 6) + drawOffset).ToVector2(),
+            mainTexture,
+            (Position + texPos + drawOffset).ToPoint().ToVector2(),
             new Rectangle(frameX * 16, frameY * 16, 16, 16),
+            Color.White,
+            0,
+            new Vector2(8),
+            1,
+            SpriteEffects,
+            0
+        );
+
+        BaseRenderer.SpriteBatch.Draw(
+            staffTexture,
+            (Position + staffPos + drawOffset).ToPoint().ToVector2(),
+            new Rectangle(staffFrameX * 16, staffFrameY * 16, 16, 16),
+            Color.White,
+            0,
+            new Vector2(8),
+            1,
+            SpriteEffects,
+            0
+        );
+        BaseRenderer.SpriteBatch.Draw(
+            staffEyeTexture,
+            (Position + staffPos + drawOffset).ToPoint().ToVector2(),
+            new Rectangle(staffEyeFrameX * 16, staffEyeFrameY * 16, 16, 16),
             Color.White,
             0,
             new Vector2(8),
@@ -191,7 +324,7 @@ public class Player : Actor
 
         // BaseRenderer.SpriteBatch.Draw(
         //     BaseRenderer.PixelTexture,
-        //     Hitbox.Location.ToPoint().ToVector2(),
+        //     Position.ToPoint().ToVector2(),
         //     Color.Yellow
         // );
     }
@@ -212,5 +345,39 @@ public class Player : Actor
             Color.White,
             6
         );
+    }
+
+    IEnumerator StaffAnimBlink()
+    {
+        const int frameTime = 3;
+        staffEyeAnim = StaffAnimations.eye_blink;
+
+        staffEyeFrameX = 1;
+        yield return frameTime;
+        staffEyeFrameX = 2;
+        yield return frameTime;
+        staffEyeFrameX = 1;
+        yield return frameTime;
+        staffEyeFrameX = 0;
+        yield return frameTime;
+
+        staffEyeAnim = StaffAnimations.none;
+    }
+
+    IEnumerator StaffAnimFlutter()
+    {
+        const int frameTime = 6;
+        staffAnim = StaffAnimations.flutter;
+
+        staffFrameX = 1;
+        yield return frameTime;
+        staffFrameX = 2;
+        yield return frameTime;
+        staffFrameX = 3;
+        yield return frameTime;
+        staffFrameX = 0;
+        yield return frameTime;
+
+        staffAnim = StaffAnimations.none;
     }
 }

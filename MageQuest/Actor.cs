@@ -180,6 +180,14 @@ public class Actor : IDisposable
 
     public FRectangle Hitbox { get => hitbox; set => hitbox = value; }
 
+    public FPoint Position { get => hitbox.Location; set => hitbox.Location = value; }
+    public int X { get => hitbox.X; set => hitbox.X = value; }
+    public int Y { get => hitbox.Y; set => hitbox.Y = value; }
+
+    public FPoint Size { get => hitbox.Size; set => hitbox.Size = value; }
+    public int Width { get => hitbox.Width; set => hitbox.Width = value; }
+    public int Height { get => hitbox.Height; set => hitbox.Height = value; }
+
     public bool OnGround { get; protected set; }
 
     public bool Enabled {

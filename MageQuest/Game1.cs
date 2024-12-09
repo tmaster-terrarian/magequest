@@ -23,6 +23,9 @@ public class Main : Game
     public static CoroutineRunner GlobalCoroutines { get; } = new();
     public static CoroutineRunner LevelCoroutines { get; private set; } = new();
 
+    public static long Frame { get; private set; }
+    public static long GlobalFrame { get; private set; }
+
     public Main()
     {
         BaseRenderer.ScreenSize = new Point(Consts.ScreenWidthPixels, Consts.ScreenHeightPixels);
@@ -81,12 +84,21 @@ public class Main : Game
 
     protected override void BeginRun()
     {
-        var player = Actor.Initialize(new Player());
+        Actor.Initialize(new Player {
+            Position = new(0, 50)
+        });
 
-        var solid = Actor.Initialize(new SolidBox {
+        Actor.Initialize(new SolidBox {
             Hitbox = new(
-                new FPoint(0, 32),
+                new FPoint(0, 64),
                 new FPoint(512, 16)
+            ),
+            Tag = new((uint)ActorTags.PlayerCollidable)
+        });
+        Actor.Initialize(new SolidBox {
+            Hitbox = new(
+                new FPoint(64, 16),
+                new FPoint(32, 16)
             ),
             Tag = new((uint)ActorTags.PlayerCollidable)
         });
@@ -104,7 +116,7 @@ public class Main : Game
 
         Input.UpdateTypingInput(gameTime);
 
-        if(PlayerData.Config.Keybinds.Pause?.Pressed ?? false)
+        if(PlayerData.Config.Keybinds.Pause.Pressed)
             Exit();
 
         if(Input.GetPressed(Keys.OemPlus))
@@ -115,6 +127,8 @@ public class Main : Game
         GlobalCoroutines.Update();
 
         UpdatePausables();
+
+        GlobalFrame++;
 
         base.Update(gameTime);
     }
@@ -129,7 +143,7 @@ public class Main : Game
 
         Camera.Update();
 
-        // TODO: Add your update logic here
+        Frame++;
     }
 
     protected override void Draw(GameTime gameTime)

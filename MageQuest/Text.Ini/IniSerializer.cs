@@ -7,7 +7,7 @@ using MageQuest.IO;
 
 namespace MageQuest.Text.Ini;
 
-public class IniSerializer()
+public static class IniSerializer
 {
     const string DefaultSectionName = "Configuration";
 

@@ -17,7 +17,6 @@ public static class PlayerData
     public static IniFile ConfigFile => _config;
 
     private const string ConfigSection_Keybinds = "Keybinds";
-    private const string ConfigSection_GamepadBinds = "GamepadBinds";
     private const string ConfigSection_Graphics = "Graphics";
 
     private static readonly string _configPath = Path.Combine(FileLocations.ProgramPath, "config.ini");
@@ -75,38 +74,11 @@ public static class PlayerData
 
     private static MappedInput ReadMappedInputData(string value)
     {
-        if(value is null) return null;
-        if(value.Length < 4) return null;
-
-        return value[..2] switch
-        {
-            "KB" => new MappedInput.Keyboard(MapKeyboard(value[3..])),
-            "GP" => new MappedInput.GamePad(MapGamepad(value[3..]), PlayerIndex.One),
-            "MB" => new MappedInput.Mouse(MapMouse(value[3..])),
-            _ => null,
-        };
+        return MappedInput.Parse(value, null);
     }
 
     private static void WriteMappedInputData(string key, MappedInput mappedInput)
     {
         _config.Set(key, $"{mappedInput}", ConfigSection_Keybinds);
-    }
-
-    private static Keys MapKeyboard(string name)
-    {
-        return Enum.GetValues<Keys>()
-            .First(key => Enum.GetName(key).Equals(name));
-    }
-
-    private static Buttons MapGamepad(string name)
-    {
-        return Enum.GetValues<Buttons>()
-            .First(key => Enum.GetName(key).Equals(name));
-    }
-
-    private static MouseButtons MapMouse(string name)
-    {
-        return Enum.GetValues<MouseButtons>()
-            .First(key => Enum.GetName(key).Equals(name));
     }
 }

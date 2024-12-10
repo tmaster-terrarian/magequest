@@ -58,6 +58,9 @@ public class Player : Actor
 
     Tag collisionMask = new();
 
+    bool debugDrawCamDeadzone;
+    bool debugDrawHitbox;
+
     protected override void PreStart()
     {
         mainTexture = () => ContentLoader.Load<Texture2D>("graphics/gameplay/entities/player/player");
@@ -78,6 +81,8 @@ public class Player : Actor
 
     protected override void Update()
     {
+        CheckDebugKeys();
+
         int lastLookDir = lookDir;
 
         moveDir = PlayerData.Config.Keybinds.Right.IsDown.ToInt32() - PlayerData.Config.Keybinds.Left.IsDown.ToInt32();
@@ -240,6 +245,18 @@ public class Player : Actor
         return SolidMeeting(Hitbox.Shift(offsetX, offsetY), matchTags, filter);
     }
 
+    private void CheckDebugKeys()
+    {
+        if(Input.GetPressed(Keys.F2))
+        {
+            debugDrawCamDeadzone = !debugDrawCamDeadzone;
+        }
+        if(Input.GetPressed(Keys.F3))
+        {
+            debugDrawHitbox = !debugDrawHitbox;
+        }
+    }
+
     private void PlayAnimation(Animations animId, Func<IEnumerator> func, bool force = false)
     {
         var name = $"playerAnimation_{animId}";
@@ -314,42 +331,51 @@ public class Player : Actor
 
         #if DEBUG
 
-        BaseRenderer.SpriteBatch.Draw(
-            BaseRenderer.PixelTexture,
-            new FRectangle(
-                new(
-                    Main.Camera.Position.X - Main.Camera.Deadzone.X,
-                    Main.Camera.Position.Y - Main.Camera.Deadzone.Y,
-                    false
-                ),
-                new(
-                    MathHelper.Max(0x200, Main.Camera.Deadzone.X + Main.Camera.Deadzone.Width),
-                    MathHelper.Max(0x200, Main.Camera.Deadzone.Y + Main.Camera.Deadzone.Height),
-                    false
-                )
-            ).ToRectangle(),
-            Color.LightPink * 0.5f
-        );
+        if(debugDrawHitbox)
+        {
+            BaseRenderer.SpriteBatch.DrawNineSlice(
+                BaseRenderer.OutlineTexture,
+                Hitbox.ToRectangle(),
+                null,
+                new Point(1),
+                new Point(1),
+                Color.Red
+            );
+        }
 
-        BaseRenderer.SpriteBatch.DrawLine(
-            new FPoint(
-                Main.Camera.Position.X,
-                Main.Camera.Position.Y,
-                false
-            ).ToVector2(),
-            new FPoint(
-                Main.Camera.TargetPosition.X,
-                Main.Camera.TargetPosition.Y,
-                false
-            ).ToVector2(),
-            Color.Yellow
-        );
+        if(debugDrawCamDeadzone)
+        {
+            BaseRenderer.SpriteBatch.Draw(
+                BaseRenderer.PixelTexture,
+                new FRectangle(
+                    new(
+                        Main.Camera.Position.X - Main.Camera.Deadzone.X,
+                        Main.Camera.Position.Y - Main.Camera.Deadzone.Y,
+                        false
+                    ),
+                    new(
+                        MathHelper.Max(0x200, Main.Camera.Deadzone.X + Main.Camera.Deadzone.Width),
+                        MathHelper.Max(0x200, Main.Camera.Deadzone.Y + Main.Camera.Deadzone.Height),
+                        false
+                    )
+                ).ToRectangle(),
+                Color.LightPink * 0.5f
+            );
 
-        // BaseRenderer.SpriteBatch.Draw(
-        //     BaseRenderer.PixelTexture,
-        //     Position.ToPoint().ToVector2(),
-        //     Color.Yellow
-        // );
+            BaseRenderer.SpriteBatch.DrawLine(
+                new FPoint(
+                    Main.Camera.Position.X,
+                    Main.Camera.Position.Y,
+                    false
+                ).ToVector2(),
+                new FPoint(
+                    Main.Camera.TargetPosition.X,
+                    Main.Camera.TargetPosition.Y,
+                    false
+                ).ToVector2(),
+                Color.Yellow
+            );
+        }
 
         #endif
     }

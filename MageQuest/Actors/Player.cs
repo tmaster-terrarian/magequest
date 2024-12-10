@@ -412,11 +412,8 @@ public class Player : Actor
 
     IEnumerator ResetPositionAndFade()
     {
-        var fadeOut = ScreenFade.FadeOut();
-        while(fadeOut.MoveNext())
-        {
-            yield return null;
-        }
+        yield return ScreenFade.FadeOut(ScreenFade.TransitionStyles.Diamond);
+
         ScreenFade.SetState(ScreenFade.TransitionStates.IdleOut);
 
         Position = new(0, 50);
@@ -427,10 +424,6 @@ public class Player : Actor
             false
         );
 
-        var fadeIn = ScreenFade.FadeIn();
-        while(fadeIn.MoveNext())
-        {
-            yield return null;
-        }
+        yield return ScreenFade.FadeIn(ScreenFade.TransitionStyles.DiamondInverse);
     }
 }

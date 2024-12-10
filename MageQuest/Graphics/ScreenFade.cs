@@ -15,6 +15,8 @@ public static class ScreenFade
 
     public static TransitionStates TransitionState { get; private set; }
 
+    public static TransitionStyles TransitionStyle { get; set; }
+
     public enum TransitionStates
     {
         Idle,
@@ -22,6 +24,13 @@ public static class ScreenFade
         FadeOut,
         IdleIn,
         IdleOut,
+    }
+
+    public enum TransitionStyles
+    {
+        Squircle,
+        Diamond,
+        DiamondInverse
     }
 
     public static void LoadContent()
@@ -87,7 +96,12 @@ public static class ScreenFade
                         BaseRenderer.SpriteBatch.Draw(
                             texture(),
                             new Vector2(x * 16, y * 16),
-                            new Rectangle(MathHelper.Min(MathHelper.Max(0, (frame/2) - y) * 16, 240), 0, 16, 16),
+                            new Rectangle(
+                                MathHelper.Min(MathHelper.Max(0, (frame/2) - y) * 16, 240),
+                                (int)TransitionStyle * 16,
+                                16,
+                                16
+                            ),
                             Color.White
                         );
                     }
@@ -106,7 +120,12 @@ public static class ScreenFade
                         BaseRenderer.SpriteBatch.Draw(
                             texture(),
                             new Vector2(x * 16, y * 16),
-                            new Rectangle(MathHelper.Min(MathHelper.Max(0, (MaxFade/2) - (frame/2) - ((Consts.ScreenHeightPixels/16) - y)) * 16, 240), 0, 16, 16),
+                            new Rectangle(
+                                MathHelper.Min(MathHelper.Max(0, (MaxFade/2) - (frame/2) - ((Consts.ScreenHeightPixels/16) - y)) * 16, 240),
+                                (int)TransitionStyle * 16,
+                                16,
+                                16
+                            ),
                             Color.White
                         );
                     }
@@ -117,14 +136,21 @@ public static class ScreenFade
         }
     }
 
-    public static IEnumerator FadeInOut()
+    public static IEnumerator FadeInOut(TransitionStyles transition = 0)
+        => FadeInOut(transition, transition);
+
+    public static IEnumerator FadeInOut(TransitionStyles transitionIn, TransitionStyles transitionOut)
     {
+        TransitionStyle = transitionIn;
+
         SetState(TransitionStates.FadeOut);
 
         while(TransitionState != TransitionStates.IdleOut)
         {
             yield return null;
         }
+
+        TransitionStyle = transitionOut;
 
         SetState(TransitionStates.FadeIn);
 
@@ -136,8 +162,10 @@ public static class ScreenFade
         SetState(TransitionStates.Idle);
     }
 
-    public static IEnumerator FadeOut()
+    public static IEnumerator FadeOut(TransitionStyles transition = 0)
     {
+        TransitionStyle = transition;
+
         SetState(TransitionStates.FadeOut);
 
         while(TransitionState != TransitionStates.IdleOut)
@@ -148,8 +176,10 @@ public static class ScreenFade
         SetState(TransitionStates.Idle);
     }
 
-    public static IEnumerator FadeIn()
+    public static IEnumerator FadeIn(TransitionStyles transition = 0)
     {
+        TransitionStyle = transition;
+
         SetState(TransitionStates.FadeIn);
 
         while(TransitionState != TransitionStates.IdleIn)

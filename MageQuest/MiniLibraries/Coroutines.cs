@@ -131,15 +131,24 @@ public class CoroutineRunner
         }
     }
 
-    private bool MoveNext(CoroutineHandle coroutine)
+    private bool MoveNext(CoroutineHandle coroutine, IEnumerator? enumerator = null)
     {
-        bool result = coroutine.Enumerator.MoveNext();
+        enumerator ??= coroutine.Enumerator;
+
+        if(enumerator.Current is IEnumerator nested)
+        {
+            if(MoveNext(coroutine, nested))
+                return true;
+            coroutine.Delay = 0;
+        }
+
+        bool result = enumerator.MoveNext();
 
         if(!result)
             return false;
-        else if(coroutine.Enumerator.Current is null)
-            coroutine.Delay++;
-        else if(coroutine.Enumerator.Current is int current)
+        else if(enumerator.Current is null)
+            return true;
+        else if(enumerator.Current is int current)
             coroutine.Delay = current;
 
         return true;

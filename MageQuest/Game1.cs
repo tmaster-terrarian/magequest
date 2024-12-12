@@ -137,12 +137,6 @@ public class Main : Game
 
         UpdatePausables();
 
-        if(Input.GetPressed(Keys.F))
-        {
-            if(!GlobalCoroutines.IsRunning("fade"))
-                GlobalCoroutines.Run("fade", ScreenFade.FadeInOut());
-        }
-
         ScreenFade.Update();
 
         GlobalFrame++;

@@ -219,8 +219,7 @@ public class Player : Actor
 
         if(Input.GetPressed(Keys.R))
         {
-            if(!Main.GlobalCoroutines.IsRunning("fade"))
-                Main.GlobalCoroutines.Run("fade", ResetPositionAndFade());
+            Main.GlobalCoroutines.TryRun("fade", ResetPositionAndFade(), out var _);
         }
 
         Main.Camera.TargetPosition = new(

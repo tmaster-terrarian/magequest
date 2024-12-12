@@ -61,6 +61,20 @@
 			"recursive": "True",
 			"action": "copy"
 		},
+		"levelImages": {
+			"path": "levels/*.png",
+			"recursive": "True",
+			"action": "build",
+			"importer": "TextureImporter",
+			"processor": "TextureProcessor",
+			"processorParam": {
+				"GenerateMipmaps": "False",
+				"PremultiplyAlpha": "True",
+				"ResizeToPowerOfTwo": "False",
+				"MakeSquare": "False",
+				"TextureFormat": "Color"
+			}
+		},
 		"effects": {
 			"path": "shaders/*.fx",
 			"recursive": "True",

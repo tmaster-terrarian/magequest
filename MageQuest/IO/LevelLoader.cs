@@ -1,0 +1,96 @@
+using System.IO;
+using System.Linq;
+
+using Microsoft.Xna.Framework;
+
+using LDtk;
+
+namespace MageQuest.IO;
+
+public static class LevelLoader
+{
+    private static readonly string levelsPath = Path.Combine(FileLocations.Data, "levels", "base");
+
+    public static string ActiveLevel { get; private set; }
+
+    public static void Load(string id, int playerEntrance = 0)
+    {
+        Actor.Cleanup();
+
+        LoadLevelData(id);
+    }
+
+    private static void LoadLevelData(string id)
+    {
+        string path = Path.Combine(levelsPath, id + ".ldtkl");
+
+        var bgTex = Path.Combine(levelsPath, "png", $"{id}_bg");
+
+        var level = LDtkLevel.FromFile(path);
+
+        var entityLayer = level.LayerInstances.First(static l => l.Identifier == "entities");
+        var specialEntityLayer = level.LayerInstances.First(static l => l.Identifier == "special_entities");
+        var collisionLayer = level.GetIntGrid("collisions");
+
+        Point gridSize = collisionLayer.GridSize;
+
+        // scene.Width = gridSize.X * CollisionSystem.TileSize;
+        // scene.Height = gridSize.Y * CollisionSystem.TileSize;
+
+        // scene.Collisions.Tiles = new int[gridSize.Y][];
+
+        // int c = 0;
+        // var array = tileLayer.IntGridCsv;
+        // for(int y = 0; y < gridSize.Y; y++)
+        // {
+        //     scene.Collisions.Tiles[y] = new int[gridSize.X];
+        //     for(int x = 0; x < gridSize.X; x++)
+        //     {
+        //         if(array[c] == 1)
+        //             scene.Collisions.Tiles[y][x] = 1;
+        //         else
+        //             scene.Collisions.Tiles[y][x] = 0;
+        //         c++;
+        //     }
+        // }
+
+        // for(int i = 0; i < entityLayer.EntityInstances.Length; i++)
+        // {
+        //     var entity = entityLayer.EntityInstances[i];
+        //     if(entity._Identifier == "Respawn")
+        //         scene.RespawnPoint = entity.Px;
+
+        //     if(entity._Identifier == "Ledge")
+        //     {
+        //         scene.Entities.Add(new() {
+        //             Position = entity.Px,
+        //             Enabled = true,
+        //             Visible = true,
+        //             Components = [
+        //                 new Solid {
+        //                     DefaultBehavior = false,
+        //                     Width = entity.Width,
+        //                     Height = entity.Height,
+        //                 }
+        //             ]
+        //         });
+        //     }
+
+        //     if(entity._Identifier == "JumpThrough")
+        //         scene.Collisions.JumpThroughs.Add(new(entity.Px, new(entity.Width, MathHelper.Max(entity.Height - 1, 1))));
+
+        //     if(entity._Identifier.EndsWith("Slope"))
+        //     {
+        //         Point point1 = entity.Px;
+        //         Point point2 = new Point(entity.FieldInstances[0]._Value[0].GetProperty("cx").GetInt32() * CollisionSystem.TileSize, entity.FieldInstances[0]._Value[0].GetProperty("cy").GetInt32() * CollisionSystem.TileSize);
+
+        //         if(entity._Identifier == "JumpThrough_Slope")
+        //             scene.Collisions.JumpThroughSlopes.Add(new(point1, point2, 2));
+        //         if(entity._Identifier == "Slope")
+        //             scene.Collisions.Slopes.Add(new(point1, point2, 2));
+        //     }
+        // }
+
+        ActiveLevel = id;
+    }
+}

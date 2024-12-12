@@ -65,6 +65,20 @@ public class CoroutineRunner
         return coroutineHandle;
     }
 
+    public bool TryRun(string methodName, IEnumerator enumerator, out CoroutineHandle handle)
+        => TryRun(methodName, enumerator, 0, out handle);
+
+    public bool TryRun(string methodName, IEnumerator enumerator, int delay, out CoroutineHandle handle)
+    {
+        if(!IsRunning(methodName))
+        {
+            handle = Run(methodName, enumerator, delay);
+            return true;
+        }
+        handle = null;
+        return false;
+    }
+
     public bool Stop(string methodName)
     {
         return _coroutines.Remove(methodName);
@@ -131,7 +145,7 @@ public class CoroutineRunner
         }
     }
 
-    private bool MoveNext(CoroutineHandle coroutine, IEnumerator? enumerator = null)
+    private static bool MoveNext(CoroutineHandle coroutine, IEnumerator? enumerator = null)
     {
         enumerator ??= coroutine.Enumerator;
 

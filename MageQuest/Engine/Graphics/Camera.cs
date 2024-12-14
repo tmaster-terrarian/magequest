@@ -32,7 +32,7 @@ public class Camera
 
     public FPoint MousePositionInWorld => Input.InputDisabled ? _lastMousePosInWorld : Input.GetMousePositionWithZoom(Zoom, clamp: true) + Position;
 
-    public FRectangle Deadzone { get; set; } = new(0, 64, 0, 16);
+    public FRectangle Deadzone { get; set; } = new(0, 32, 0, 4);
 
     public void SetShake(float shakeMagnitude, int shakeTime)
     {

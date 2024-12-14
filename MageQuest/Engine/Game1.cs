@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using MageQuest.Actors;
 using MageQuest.Graphics;
@@ -135,6 +136,9 @@ public class Main : Game
         if(Input.GetPressed(Keys.OemMinus))
             BaseRenderer.PixelScale--;
 
+        if(Input.GetPressed(Keys.R))
+            GlobalCoroutines.TryRun("fade", ResetLevel(), out var _);
+
         GlobalCoroutines.Update();
 
         UpdatePausables();
@@ -152,7 +156,8 @@ public class Main : Game
 
         LevelCoroutines?.Update();
 
-        Actor.DoUpdate();
+        if(LevelLoader.ActiveLevel != null)
+            Actor.DoUpdate();
 
         Camera.Update();
 
@@ -183,5 +188,25 @@ public class Main : Game
     private void Game_Exiting(object sender, ExitingEventArgs e)
     {
         PlayerData.SaveConfig();
+    }
+
+    static IEnumerator ResetLevel()
+    {
+        var lvl = LevelLoader.ActiveLevel;
+        var ent = LevelLoader.CurrentEntrance;
+
+        yield return ScreenFade.FadeOut(ScreenFade.TransitionStyles.Diamond);
+        ScreenFade.SetState(ScreenFade.TransitionStates.IdleOut);
+
+        LevelLoader.Unload();
+
+        LevelCoroutines.StopAll();
+        LevelCoroutines = new();
+
+        yield return null;
+
+        LevelLoader.Load(lvl, ent);
+
+        yield return ScreenFade.FadeIn(ScreenFade.TransitionStyles.DiamondInverse);
     }
 }

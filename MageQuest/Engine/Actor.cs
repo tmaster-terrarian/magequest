@@ -85,6 +85,8 @@ public class Actor : IDisposable
 
     public static void DoUpdate()
     {
+        if(!_active) return;
+
         foreach(var actor in actors)
         {
             if(!actor.Enabled) continue;
@@ -95,6 +97,8 @@ public class Actor : IDisposable
 
     public static void DoDraw()
     {
+        if(!_active) return;
+
         foreach(var actor in ToDraw)
         {
             if(!actor.Enabled) continue;
@@ -104,6 +108,8 @@ public class Actor : IDisposable
 
     public static void DoDrawUI()
     {
+        if(!_active) return;
+
         foreach(var actor in ToDraw)
         {
             if(!actor.Enabled) continue;

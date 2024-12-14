@@ -14,7 +14,9 @@ public static class LevelLoader
 
     public static string ActiveLevel { get; private set; }
 
-    public static FPoint[] PlayerEntrances { get; private set; } = [];
+    public static int CurrentEntrance { get; private set; }
+
+    public static FPoint[] Entrances { get; private set; } = [];
 
     public static void Load(string id, int playerEntrance = 0)
     {
@@ -22,14 +24,26 @@ public static class LevelLoader
 
         LoadLevelData(id);
 
-        if(PlayerEntrances.Length != 0 && playerEntrance >= 0 && playerEntrance < PlayerEntrances.Length)
+        ActiveLevel = id;
+
+        if(Entrances.Length != 0 && playerEntrance >= 0 && playerEntrance < Entrances.Length)
         {
+            CurrentEntrance = playerEntrance;
+
             Actor.Initialize(new Player {
-                Position = PlayerEntrances[playerEntrance] + new FPoint(-4, -14),
+                Position = Entrances[playerEntrance] + new FPoint(-4, -14),
             });
         }
 
         Actor.DoStart();
+    }
+
+    public static void Unload()
+    {
+        Actor.Cleanup();
+        ActiveLevel = null;
+        CurrentEntrance = 0;
+        Entrances = [];
     }
 
     private static void LoadLevelData(string id)
@@ -51,10 +65,10 @@ public static class LevelLoader
                 entrances.Add(entity);
         }
 
-        PlayerEntrances = new FPoint[entrances.Count];
+        Entrances = new FPoint[entrances.Count];
         foreach(var entrance in entrances)
         {
-            PlayerEntrances[((JsonElement)entrance.FieldInstances[0].Value).GetInt32()] = entrance.PixelCoord.ToFPoint();
+            Entrances[((JsonElement)entrance.FieldInstances[0].Value).GetInt32()] = entrance.PixelCoord.ToFPoint();
         }
 
         foreach(var entity in entityLayer.EntityInstances)
@@ -99,7 +113,5 @@ public static class LevelLoader
                 )),
             }
         );
-
-        ActiveLevel = id;
     }
 }

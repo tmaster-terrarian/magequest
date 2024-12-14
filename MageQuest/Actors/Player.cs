@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using MageQuest.Graphics;
+using MageQuest.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -217,11 +218,6 @@ public class Player : Actor
         MoveY(vel.Y, () => vel.Y = 0);
         MoveX(vel.X, () => vel.X = 0);
 
-        if(Input.GetPressed(Keys.R))
-        {
-            Main.GlobalCoroutines.TryRun("fade", ResetPositionAndFade(), out var _);
-        }
-
         Main.Camera.TargetPosition = new(
             X + camDistanceX + 0x800,
             Y + camDistanceY + 0xC00,
@@ -433,22 +429,5 @@ public class Player : Actor
         yield return frameTime;
 
         staffAnim = StaffAnimations.none;
-    }
-
-    IEnumerator ResetPositionAndFade()
-    {
-        yield return ScreenFade.FadeOut(ScreenFade.TransitionStyles.Diamond);
-
-        ScreenFade.SetState(ScreenFade.TransitionStates.IdleOut);
-
-        Position = new(0, 50);
-        Velocity = FPoint.Zero;
-        Main.Camera.Position = new(
-            X + camDistanceX + 0x800,
-            Y + camDistanceY + 0xC00,
-            false
-        );
-
-        yield return ScreenFade.FadeIn(ScreenFade.TransitionStyles.DiamondInverse);
     }
 }

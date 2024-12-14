@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using System.Linq;
 
 namespace MageQuest;
 
@@ -8,10 +9,12 @@ public class Actor : IDisposable
 {
     private static ulong _lastId;
 
-    private static readonly List<Actor> actors = [];
-    private static readonly HashSet<(Solid, int)> solids = [];
+    private static bool _active = false;
 
     private static bool _locked = false;
+
+    private static readonly List<Actor> actors = [];
+    private static readonly HashSet<(Solid, int)> solids = [];
 
     private static Comparison<Actor> CompareDepth => (a, b) => Math.Sign(b.Depth - a.Depth);
 
@@ -36,6 +39,9 @@ public class Actor : IDisposable
 
     public static void DoStart()
     {
+        if(_active) return;
+        _active = true;
+
         // as a for loop it can naturally expand, since the list
         // will never shrink and items are appended to the end
         // (at least i hope)
@@ -58,6 +64,9 @@ public class Actor : IDisposable
 
     public static void Cleanup()
     {
+        if(!_active) return;
+        _active = false;
+
         foreach(var actor in actors)
         {
             if(actor._disposed) continue;
@@ -129,7 +138,7 @@ public class Actor : IDisposable
         if(solids.Count == 0) return null;
         foreach(var solid in solids)
         {
-            if(solid.Item1.Enabled && solid.Item1.IsColliding(rectangle))
+            if(solid.Item1.Enabled && solid.Item1.Collidable && solid.Item1.IsCollidingWith(rectangle))
             {
                 return solid.Item1;
             }
@@ -145,7 +154,7 @@ public class Actor : IDisposable
         if(solids.Count == 0) return null;
         foreach(var solid in solids)
         {
-            if(solid.Item1.Enabled && solid.Item1.Tag.Matches(matchTags, filter) && solid.Item1.IsColliding(rectangle))
+            if(solid.Item1.Collidable && solid.Item1.Tag.Matches(matchTags, filter) && solid.Item1.IsCollidingWith(rectangle))
             {
                 return solid.Item1;
             }
@@ -155,34 +164,38 @@ public class Actor : IDisposable
 
     public static List<Solid> SolidsPlace(FRectangle rectangle)
     {
-        List<Solid> list = [];
-        if(solids.Count == 0) return list;
-
-        foreach(var solid in solids)
-        {
-            if(solid.Item1.Enabled && solid.Item1.IsColliding(rectangle))
-            {
-                list.Add(solid.Item1);
-            }
-        }
-
-        return list;
+        return [..
+            from solid in solids
+            where solid.Item1.Collidable && solid.Item1.IsCollidingWith(rectangle)
+            select solid.Item1
+        ];
     }
 
     public static List<Solid> SolidsPlace(FRectangle rectangle, Tag matchTags, TagFilter filter)
     {
-        List<Solid> list = [];
-        if(solids.Count == 0) return list;
+        return [..
+            from solid in solids
+            where solid.Item1.Collidable && solid.Item1.Tag.Matches(matchTags, filter) && solid.Item1.IsCollidingWith(rectangle)
+            select solid.Item1
+        ];
+    }
 
-        foreach(var solid in solids)
-        {
-            if(solid.Item1.Enabled && solid.Item1.Tag.Matches(matchTags, filter) && solid.Item1.IsColliding(rectangle))
-            {
-                list.Add(solid.Item1);
-            }
-        }
+    public static List<T> GetAll<T>() where T : Actor
+    {
+        return [..
+            from actor in actors
+            where actor is T && actor.Enabled
+            select actor as T
+        ];
+    }
 
-        return list;
+    public static List<T> GetAll<T>(Tag matchTags, TagFilter filter) where T : Actor
+    {
+        return [..
+            from actor in actors
+            where actor is T && actor.Enabled && actor.Tag.Matches(matchTags, filter)
+            select actor as T
+        ];
     }
 
     private bool _disposed;
@@ -204,6 +217,8 @@ public class Actor : IDisposable
     public Tag Tag { get; set; }
 
     public FRectangle Hitbox { get => _hitbox; set => _hitbox = value; }
+
+    public bool Collidable { get; set; } = true;
 
     public FPoint Position { get => _hitbox.Location; set => _hitbox.Location = value; }
     public int X { get => _hitbox.X; set => _hitbox.X = value; }
@@ -278,10 +293,16 @@ public class Actor : IDisposable
     protected virtual bool CheckColliding(int offsetX, int offsetY, Tag matchTags = default, TagFilter filter = TagFilter.NoFiltering)
         => false;
 
-    protected virtual void MoveX(int move, Action? onCollide)
+    public virtual void MoveX(int move, Action? onCollide)
     {
         if(move != 0)
         {
+            if(solids.Count == 0)
+            {
+                X += move;
+                return;
+            }
+
             int sign = Math.Sign(move);
             while(move != 0)
             {
@@ -289,17 +310,17 @@ public class Actor : IDisposable
                 if(col1 && !CheckColliding(sign, -1))
                 {
                     // slope up
-                    _hitbox.X += sign;
-                    _hitbox.Y -= 1;
+                    X += sign;
+                    Y -= 1;
                     move -= sign;
                 }
                 else if(!col1)
                 {
                     // slope down
                     if(!CheckColliding(sign, 1) && CheckColliding(sign, 2))
-                        _hitbox.Y += 1;
+                        Y += 1;
 
-                    _hitbox.X += sign;
+                    X += sign;
                     move -= sign;
                 }
                 else
@@ -311,16 +332,23 @@ public class Actor : IDisposable
         }
     }
 
-    protected virtual void MoveY(int move, Action? onCollide)
+    public virtual void MoveY(int move, Action? onCollide)
     {
         if(move != 0)
         {
+            // we can garuntee that nothing collidable exists
+            if(solids.Count == 0)
+            {
+                Y += move;
+                return;
+            }
+
             int sign = Math.Sign(move);
             while(move != 0)
             {
                 if(!CheckColliding(0, sign))
                 {
-                    _hitbox.Y += sign;
+                    Y += sign;
                     move -= sign;
                     continue;
                 }
@@ -331,11 +359,16 @@ public class Actor : IDisposable
         }
     }
 
-    protected virtual bool IsRiding(Solid solid)
+    public virtual bool IsRiding(Solid solid)
     {
         ArgumentNullException.ThrowIfNull(solid, nameof(solid));
 
-        return solid.IsColliding(Hitbox.Shift(0, 1));
+        return solid.IsCollidingWith(Hitbox.Shift(0, 1));
+    }
+
+    public virtual bool IsCollidingWith(FRectangle rectangle)
+    {
+        return rectangle.Intersects(Hitbox);
     }
 
     public virtual void Squished() {}

@@ -11,4 +11,6 @@ public static class Consts
     public const int ScreenHeightPixels = 240;
     public const int ScreenWidth = ScreenWidthPixels << SHFT;
     public const int ScreenHeight = ScreenHeightPixels << SHFT;
+
+    public const int OneTile = 0x2000;
 }

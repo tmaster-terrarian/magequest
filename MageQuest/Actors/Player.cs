@@ -140,11 +140,6 @@ public class Player : Actor
                 3 => 2,
                 _ => 0,
             });
-
-            drawOffset.Y = walkFrame switch {
-                1 or 3 => -1,
-                _ => 0,
-            } << Consts.SHFT;
         }
         else
         {
@@ -160,6 +155,11 @@ public class Player : Actor
                 ? JumpingGravity
                 : Gravity;
         }
+
+        drawOffset.Y = walkFrame switch {
+            1 or 3 => -1,
+            _ => 0,
+        } << Consts.SHFT;
 
         if(PlayerData.Config.Keybinds.Jump.Pressed)
         {

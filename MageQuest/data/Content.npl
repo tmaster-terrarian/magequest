@@ -57,7 +57,7 @@
 			}
 		},
 		"levels": {
-			"path": "levels/*.json",
+			"path": "levels/*.ldtkl",
 			"recursive": "True",
 			"action": "copy"
 		},

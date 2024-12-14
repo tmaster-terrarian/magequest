@@ -6,6 +6,7 @@ namespace MageQuest;
 public enum ActorTags : uint
 {
     PlayerCollidable = 1,
+    EnemyCollidable = 2,
 }
 
 public static class TagExtensions

@@ -57,9 +57,4 @@ public class SolidBox : Solid
             ColorUtil.CreateFromHex(0xd77bba)
         );
     }
-
-    public override bool IsColliding(FRectangle rectangle)
-    {
-        return rectangle.Intersects(Hitbox);
-    }
 }

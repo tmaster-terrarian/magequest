@@ -2,7 +2,7 @@
 using System.IO;
 using MageQuest.Actors;
 using MageQuest.Graphics;
-
+using MageQuest.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content.Pipeline;
@@ -91,28 +91,30 @@ public class Main : Game
 
     protected override void BeginRun()
     {
-        Actor.Initialize(new Player {
-            Position = new(0, 50)
-        });
+        // Actor.Initialize(new Player {
+        //     Position = new(0, 50)
+        // });
 
-        Actor.Initialize(new SolidBox {
-            Hitbox = new(
-                new FPoint(0, 64),
-                new FPoint(512, 16)
-            ),
-            Depth = 50,
-            Tag = new((uint)ActorTags.PlayerCollidable)
-        });
-        Actor.Initialize(new SolidBox {
-            Hitbox = new(
-                new FPoint(64, 16),
-                new FPoint(32, 16)
-            ),
-            Depth = 50,
-            Tag = new((uint)ActorTags.PlayerCollidable)
-        });
+        // Actor.Initialize(new SolidBox {
+        //     Hitbox = new(
+        //         new FPoint(0, 64),
+        //         new FPoint(512, 16)
+        //     ),
+        //     Depth = 50,
+        //     Tag = new((uint)ActorTags.PlayerCollidable)
+        // });
+        // Actor.Initialize(new SolidBox {
+        //     Hitbox = new(
+        //         new FPoint(64, 16),
+        //         new FPoint(32, 16)
+        //     ),
+        //     Depth = 50,
+        //     Tag = new((uint)ActorTags.PlayerCollidable)
+        // });
 
-        Actor.DoStart();
+        // Actor.DoStart();
+
+        LevelLoader.Load("test", 0);
     }
 
     protected override void Update(GameTime gameTime)

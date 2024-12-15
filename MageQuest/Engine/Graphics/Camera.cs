@@ -34,6 +34,8 @@ public class Camera
 
     public FRectangle Deadzone { get; set; } = new(0, 32, 0, 4);
 
+    public FRectangle Bounds { get; set; } = new(0, 0, Consts.ScreenWidthPixels, Consts.ScreenHeightPixels);
+
     public void SetShake(float shakeMagnitude, int shakeTime)
     {
         if(Math.Abs(shakeMagnitude) >= this.currentShake)
@@ -82,9 +84,11 @@ public class Camera
             nextPos.X = targetPos.X - Deadzone.Width;
         }
 
-        Position = nextPos;
+        Position = FPoint.Clamp(nextPos, Bounds.Location + halfScreen, Bounds.Location + Bounds.Size - halfScreen);
 
-        var basePosition = Vector2.Round((Position - halfScreen).ToVector2());
+        // screen space
+
+        Vector2 basePosition = Vector2.Round((Position - halfScreen).ToVector2());
 
         var shakePosition = basePosition;
         if(currentShake != 0)

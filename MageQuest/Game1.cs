@@ -18,14 +18,14 @@ public class Main : Game
 {
     private static GraphicsDeviceManager _graphics;
 
-    public static Camera Camera  { get; private set; }
+    public static Camera Camera { get; private set; }
 
     public static bool Paused { get; set; }
 
     public static Logger Logger { get; set; } = new("main");
 
     public static CoroutineRunner GlobalCoroutines { get; } = new();
-    public static CoroutineRunner LevelCoroutines { get; private set; } = new();
+    public static CoroutineRunner Coroutines { get; private set; } = new();
 
     public static long Frame { get; private set; }
     public static long GlobalFrame { get; private set; }
@@ -154,7 +154,7 @@ public class Main : Game
     {
         if(Paused) return;
 
-        LevelCoroutines?.Update();
+        Coroutines?.Update();
 
         if(LevelLoader.ActiveLevel != null)
             Actor.DoUpdate();
@@ -198,12 +198,10 @@ public class Main : Game
         yield return ScreenFade.FadeOut(ScreenFade.TransitionStyles.Diamond);
         ScreenFade.SetState(ScreenFade.TransitionStates.IdleOut);
 
-        LevelLoader.Unload();
+        Logger.LogInfo($"loading {lvl}@{ent}");
 
-        LevelCoroutines.StopAll();
-        LevelCoroutines = new();
-
-        yield return null;
+        Coroutines.StopAll();
+        Coroutines = new();
 
         LevelLoader.Load(lvl, ent);
 

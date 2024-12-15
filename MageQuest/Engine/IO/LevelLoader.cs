@@ -20,7 +20,7 @@ public static class LevelLoader
 
     public static void Load(string id, int playerEntrance = 0)
     {
-        Actor.Cleanup();
+        Unload();
 
         LoadLevelData(id);
 
@@ -33,6 +33,10 @@ public static class LevelLoader
             Actor.Initialize(new Player {
                 Position = Entrances[playerEntrance] + new FPoint(-4, -14),
             });
+        }
+        else
+        {
+            CurrentEntrance = -1;
         }
 
         Actor.DoStart();
@@ -49,10 +53,11 @@ public static class LevelLoader
     private static void LoadLevelData(string id)
     {
         var path = Path.Combine(levelsPath, $"{id}.ldtkl");
-
-        var bgTex = Path.Combine(levelsPath, "png", $"{id}_bg");
+        var bgPath = Path.Combine(levelsPath, "png", $"{id}_bg");
 
         var level = LDtkLevel.FromFile(path);
+
+        Main.Camera.Bounds = new(0, 0, level.PixelWidth, level.PixelHeight);
 
         var entityLayer = level.LayerInstances.First(static l => l.Identifier == "entities");
         var specialEntityLayer = level.LayerInstances.First(static l => l.Identifier == "special_entities");
@@ -105,7 +110,7 @@ public static class LevelLoader
         }
 
         var collisionLayer = level.GetIntGrid("collisions");
-        var tilemap = Actor.Initialize(
+        Actor.Initialize(
             new Tilemap(collisionLayer.GridSize.X, collisionLayer.GridSize.Y, collisionLayer.Values) {
                 Tag = Tag.Add(Tag.Empty, (uint)(
                     ActorTags.PlayerCollidable |

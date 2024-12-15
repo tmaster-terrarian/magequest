@@ -255,24 +255,24 @@ public class Player : Actor
     private void PlayAnimation(Animations animId, Func<IEnumerator> func, bool force = false)
     {
         var name = $"playerAnimation_{animId}";
-        if(!Main.LevelCoroutines.IsRunning(name) || force)
+        if(!Main.Coroutines.IsRunning(name) || force)
         {
             if(force)
-                Main.LevelCoroutines.Stop(name);
+                Main.Coroutines.Stop(name);
 
-            Main.LevelCoroutines.Run(name, func());
+            Main.Coroutines.Run(name, func());
         }
     }
 
     private void PlayStaffAnimation(StaffAnimations animId, Func<IEnumerator> func, bool force = false)
     {
         var name = $"playerAnimation_staff_{animId}";
-        if(!Main.LevelCoroutines.IsRunning(name) || force)
+        if(!Main.Coroutines.IsRunning(name) || force)
         {
             if(force)
-                Main.LevelCoroutines.Stop(name);
+                Main.Coroutines.Stop(name);
 
-            Main.LevelCoroutines.Run(name, func());
+            Main.Coroutines.Run(name, func());
         }
     }
 

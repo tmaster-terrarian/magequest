@@ -149,7 +149,9 @@ public struct FPoint : IEquatable<FPoint>
 
     public static FPoint Clamp(FPoint value, FPoint min, FPoint max)
     {
-        return new(MathHelper.Clamp(value.X, min.X, max.X), MathHelper.Clamp(value.Y, min.Y, max.Y), false);
+        value.X = MathHelper.Clamp(value.X, min.X, max.X);
+        value.Y = MathHelper.Clamp(value.Y, min.Y, max.Y);
+        return value;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

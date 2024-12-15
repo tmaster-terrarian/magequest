@@ -73,6 +73,8 @@ public class Actor : IDisposable
             actor.Dispose();
         }
 
+        _drawOrderDirty = true;
+
         toDraw.Clear();
         solids.Clear();
         actors.Clear();

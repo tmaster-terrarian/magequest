@@ -198,8 +198,6 @@ public class Main : Game
         yield return ScreenFade.FadeOut(ScreenFade.TransitionStyles.Diamond);
         ScreenFade.SetState(ScreenFade.TransitionStates.IdleOut);
 
-        Logger.LogInfo($"loading {lvl}@{ent}");
-
         Coroutines.StopAll();
         Coroutines = new();
 

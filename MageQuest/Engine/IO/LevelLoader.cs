@@ -22,6 +22,8 @@ public static class LevelLoader
     {
         Unload();
 
+        Main.Logger.LogInfo($"loading {id}:{playerEntrance}");
+
         LoadLevelData(id);
 
         ActiveLevel = id;

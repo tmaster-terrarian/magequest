@@ -19,7 +19,7 @@ public class Player : Actor
     public const int JumpingGravity = 0x20;
     public const int JumpingSpeed = 0x500;
 
-    public const int MaxWalkingSpeed = 0x400;
+    public const int MaxWalkingSpeed = 0x32C;
     public const int GroundAccel = 0x55;
     public const int AirAccel = 0x20;
     public const int Fric = 0x33;
@@ -69,6 +69,7 @@ public class Player : Actor
         staffEyeTexture = () => ContentLoader.Load<Texture2D>("graphics/gameplay/entities/player/staff_eye");
 
         Size = new(8, 14);
+        Depth = 50;
 
         collisionMask = Tag.Add(collisionMask, (uint)ActorTags.PlayerCollidable);
 

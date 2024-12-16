@@ -34,13 +34,13 @@ public struct FPoint : IEquatable<FPoint>
     public int Y;
 
     [JsonIgnore]
-    public readonly int XPixels => X >> SHFT;
+    public readonly int XPixels => X / MULT;
 
     [JsonIgnore]
-    public readonly int YPixels => Y >> SHFT;
+    public readonly int YPixels => Y / MULT;
 
     [JsonIgnore]
-    internal readonly string DebugDisplayString => $"{XPixels}.{Math.Abs(X & 0x1FF)}  {YPixels}.{Math.Abs(Y & 0x1FF)}";
+    internal readonly string DebugDisplayString => $"{XPixels}.{Math.Abs(X) & 0x1FF}  {YPixels}.{Math.Abs(Y) & 0x1FF}";
 
     /// <summary>
     /// Constructs a point with X and Y from two values.
@@ -193,7 +193,7 @@ public struct FPoint : IEquatable<FPoint>
 
     public override readonly string ToString()
     {
-        return $"{{X:{XPixels}.{Math.Abs(X & 0x1FF)} Y:{YPixels}.{Math.Abs(Y & 0x1FF)}}}";
+        return $"{{X:{XPixels}.{Math.Abs(X) & 0x1FF} Y:{YPixels}.{Math.Abs(Y) & 0x1FF}}}";
     }
 
     public readonly void Deconstruct(out int x, out int y)

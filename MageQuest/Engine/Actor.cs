@@ -49,7 +49,7 @@ public class Actor : IDisposable
         {
             var actor = actors[i];
 
-            if(!actor.Enabled) continue;
+            if(!actor.IsEnabled) continue;
             actor.PreStart();
         }
 
@@ -57,7 +57,7 @@ public class Actor : IDisposable
 
         foreach(var actor in actors)
         {
-            if(!actor.Enabled) continue;
+            if(!actor.IsEnabled) continue;
             actor.Start();
         }
     }
@@ -91,7 +91,7 @@ public class Actor : IDisposable
 
         foreach(var actor in actors)
         {
-            if(!actor.Enabled) continue;
+            if(!actor.IsEnabled) continue;
 
             actor.Update();
         }
@@ -103,7 +103,7 @@ public class Actor : IDisposable
 
         foreach(var actor in ToDraw)
         {
-            if(!actor.Enabled) continue;
+            if(!actor.IsEnabled) continue;
             actor.Draw();
         }
     }
@@ -114,7 +114,7 @@ public class Actor : IDisposable
 
         foreach(var actor in ToDraw)
         {
-            if(!actor.Enabled) continue;
+            if(!actor.IsEnabled) continue;
             actor.DrawUI();
         }
     }
@@ -146,7 +146,7 @@ public class Actor : IDisposable
         if(solids.Count == 0) return null;
         foreach(var solid in solids)
         {
-            if(solid.Item1.Enabled && solid.Item1.Collidable && solid.Item1.IsCollidingWith(rectangle))
+            if(solid.Item1.IsEnabled && solid.Item1.Collidable && solid.Item1.IsCollidingWith(rectangle))
             {
                 return solid.Item1;
             }
@@ -192,7 +192,7 @@ public class Actor : IDisposable
     {
         return [..
             from actor in actors
-            where actor is T && actor.Enabled
+            where actor is T && actor.IsEnabled
             select actor as T
         ];
     }
@@ -201,7 +201,7 @@ public class Actor : IDisposable
     {
         return [..
             from actor in actors
-            where actor is T && actor.Enabled && actor.Tag.Matches(matchTags, filter)
+            where actor is T && actor.IsEnabled && actor.Tag.Matches(matchTags, filter)
             select actor as T
         ];
     }
@@ -249,7 +249,7 @@ public class Actor : IDisposable
         }
     }
 
-    public bool Enabled {
+    public bool IsEnabled {
         get => _enabled;
         set {
             if(_enabled != value)
@@ -270,6 +270,8 @@ public class Actor : IDisposable
                     {
                         solids.Add((solid, solid.Index));
                     }
+
+                    this.Enabled();
                 }
             }
         }
@@ -286,6 +288,8 @@ public class Actor : IDisposable
     protected virtual void Draw() {}
 
     protected virtual void DrawUI() {}
+
+    protected virtual void Enabled() {}
 
     protected virtual void Disabled() {}
 

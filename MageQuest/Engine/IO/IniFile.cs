@@ -55,7 +55,7 @@ public class IniFile(string data = null)
                 stream.Write(value, 0, value.Length);
             }
 
-            stream.WriteByte(Encoding.UTF8.GetBytes(['\n'])[0]);
+            stream.WriteByte(Encoding.UTF8.GetBytes((char[])['\n'])[0]);
         }
     }
 

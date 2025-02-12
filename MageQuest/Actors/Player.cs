@@ -145,6 +145,9 @@ public class Player : Actor
         }
         else
         {
+            if(moveDir == 0)
+                vel.X = MathUtil.Approach(vel.X, 0, Fric / 4);
+
             walkFrame = vel.Y > 0 ? 1 : 3;
 
             frameX = _lookDir + (walkFrame switch {

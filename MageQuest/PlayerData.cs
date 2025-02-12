@@ -18,6 +18,7 @@ public static class PlayerData
 
     private const string ConfigSection_Keybinds = "Keybinds";
     private const string ConfigSection_Graphics = "Graphics";
+    private const string ConfigSection_Debug = "Debug";
 
     private static readonly string _configPath = Path.Combine(FileLocations.ProgramPath, "config.ini");
 
@@ -33,6 +34,8 @@ public static class PlayerData
         Config.Keybinds.Attack = ReadMappedInputData(_config.Get("attack", ConfigSection_Keybinds, "KB:X"))      ?? Config.Keybinds.Attack;
         Config.Keybinds.Pause  = ReadMappedInputData(_config.Get("pause",  ConfigSection_Keybinds, "KB:Escape")) ?? Config.Keybinds.Pause;
 
+        Config.Debug.ShowMenu = _config.Get("show-menu", ConfigSection_Debug, "false") == "true";
+
         if(int.TryParse(_config.Get("scale", ConfigSection_Graphics, "1"), out int value))
         {
             BaseRenderer.PixelScale = value;
@@ -45,13 +48,13 @@ public static class PlayerData
         WriteMappedInputData("left", Config.Keybinds.Left);
         WriteMappedInputData("down", Config.Keybinds.Down);
         WriteMappedInputData("up", Config.Keybinds.Up);
-
         WriteMappedInputData("jump", Config.Keybinds.Jump);
         WriteMappedInputData("attack", Config.Keybinds.Attack);
-
         WriteMappedInputData("pause", Config.Keybinds.Pause);
 
         _config.Set("scale", BaseRenderer.PixelScale.ToString(), ConfigSection_Graphics);
+
+        _config.Set("show-menu", Config.Debug.ShowMenu.ToString().ToLower(), ConfigSection_Debug);
 
         _config.Write(_configPath);
     }
@@ -69,6 +72,11 @@ public static class PlayerData
             public static MappedInput Attack = new MappedInput.Keyboard(Keys.X);
 
             public static MappedInput Pause = new MappedInput.Keyboard(Keys.Escape);
+        }
+
+        public static class Debug
+        {
+            public static bool ShowMenu = false;
         }
     }
 

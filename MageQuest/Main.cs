@@ -80,6 +80,8 @@ public class Main : Game
 
         Exiting += Game_Exiting;
 
+        ImGuiRenderer.Initialize(this);
+
         base.Initialize();
     }
 
@@ -184,6 +186,8 @@ public class Main : Game
         BaseRenderer.FinalizeDraw();
 
         base.Draw(gameTime);
+
+        ImGuiRenderer.Draw(gameTime);
     }
 
     private void Game_Exiting(object sender, ExitingEventArgs e)

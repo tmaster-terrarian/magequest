@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 
 using MageQuest.Graphics;
 using MageQuest.IO;
+using DebugRenderers = MageQuest.Graphics.DebugRenderers;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -30,6 +32,12 @@ public class Main : Game
 
     public static long Frame { get; private set; }
     public static long GlobalFrame { get; private set; }
+    public static long DrawCalls { get; private set; }
+
+    public static List<DebugRenderer> DebugRenderers { get; private set; } =
+    [
+        new DebugRenderers.FpsMonitorRenderer(targetFramerate: 50),
+    ];
 
     public Main()
     {
@@ -49,6 +57,8 @@ public class Main : Game
         }
 
         Window.Title = "Mage Quest!";
+
+        TargetElapsedTime = TimeSpan.FromMicroseconds(20000);
     }
 
     protected override void Initialize()
@@ -91,6 +101,11 @@ public class Main : Game
         BaseRenderer.LoadContent();
         Fonts.LoadContent();
         ScreenFade.LoadContent();
+
+        foreach(var r in DebugRenderers)
+        {
+            r.Init();
+        }
     }
 
     protected override void BeginRun()
@@ -173,10 +188,20 @@ public class Main : Game
 
         Actor.DoDraw();
 
+        foreach(var r in DebugRenderers)
+        {
+            r.Draw(BaseRenderer.SpriteBatch, gameTime);
+        }
+
         BaseRenderer.EndDraw();
         BaseRenderer.BeginDrawUI();
 
         Actor.DoDrawUI();
+
+        foreach(var r in DebugRenderers)
+        {
+            r.DrawUI(BaseRenderer.SpriteBatch, gameTime);
+        }
 
         ScreenFade.DrawUI();
 
@@ -187,7 +212,14 @@ public class Main : Game
 
         base.Draw(gameTime);
 
+        foreach(var r in DebugRenderers)
+        {
+            r.PostDraw();
+        }
+
         ImGuiRenderer.Draw(gameTime);
+
+        DrawCalls++;
     }
 
     private void Game_Exiting(object sender, ExitingEventArgs e)

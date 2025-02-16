@@ -53,7 +53,7 @@ public class Main : Game
         }
         catch(Exception e)
         {
-            Logger.LogError($"Failed to initialize audio: {e}");
+            Logger.LogError($"failed to initialize audio: {e}");
         }
 
         Window.Title = "Mage Quest!";
@@ -63,7 +63,7 @@ public class Main : Game
 
     protected override void Initialize()
     {
-        Logger.LogInfo("Entering main loop");
+        Logger.LogInfo("entering main loop");
 
         {
             bool configExists = File.Exists(Path.Combine(FileLocations.ProgramPath, "config.ini"));
@@ -72,10 +72,12 @@ public class Main : Game
 
             if(!configExists)
             {
-                Logger.LogInfo("Regenerating config file");
+                Logger.LogInfo("regenerating config file");
                 PlayerData.SaveConfig();
             }
         }
+
+        PlayerSave.Initialize();
 
         _graphics.PreferredBackBufferWidth = BaseRenderer.ScreenSize.X * BaseRenderer.PixelScale;
         _graphics.PreferredBackBufferHeight = BaseRenderer.ScreenSize.Y * BaseRenderer.PixelScale;
@@ -133,7 +135,21 @@ public class Main : Game
 
         // Actor.DoStart();
 
-        LevelLoader.Load("test", 0);
+        PlayerSave.Load(0);
+
+        if(File.Exists(Path.Combine(FileLocations.Data, "levels", "base", $"{PlayerSave.Current.Level}.ldtkl")))
+        {
+            LevelLoader.Load(PlayerSave.Current.Level);
+
+            if(PlayerSave.Current.Position != FPoint.Zero)
+            {
+                var l = Actor.GetAll<Actors.Player>();
+                if(l.Count != 0)
+                {
+                    l[0].Position = PlayerSave.Current.Position;
+                }
+            }
+        }
     }
 
     protected override void Update(GameTime gameTime)

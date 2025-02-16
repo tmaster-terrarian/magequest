@@ -65,7 +65,7 @@ public class IniFile(string data = null)
         Write(fileStream);
     }
 
-    public static IniRoot Parse(string data)
+    public static IniRoot Parse(string data, bool verboseOutput = false)
     {
         using StringReader reader = new(data);
         IniRoot result = [];
@@ -82,7 +82,8 @@ public class IniFile(string data = null)
             // ignore empty lines
             if(line is null || line == "")
             {
-                Console.WriteLine($"{lineNum}: empty");
+                if(verboseOutput)
+                    Console.WriteLine($"{lineNum}: empty");
                 continue;
             }
 
@@ -90,7 +91,8 @@ public class IniFile(string data = null)
             if(line[^1] == '\r')
             {
                 line = line[..^1];
-                Console.WriteLine($"{lineNum}: CR");
+                if(verboseOutput)
+                    Console.WriteLine($"{lineNum}: CR");
                 if(line == "") continue;
             }
 
@@ -111,11 +113,13 @@ public class IniFile(string data = null)
             while(line[0] == ' ' || line[0] == '\t')
             {
                 line = line[1..];
-                Console.WriteLine($"{lineNum}: preceeding whitespace");
+                if(verboseOutput)
+                    Console.WriteLine($"{lineNum}: preceeding whitespace");
             }
             if(line == "" || line[0] == ';')
             {
-                Console.WriteLine($"{lineNum}: all whitespace, or comment");
+                if(verboseOutput)
+                    Console.WriteLine($"{lineNum}: all whitespace, or comment");
                 continue;
             }
 
@@ -127,13 +131,15 @@ public class IniFile(string data = null)
                 if(currentSection is not null)
                 {
                     result[currentSectionName] = currentSection;
-                    Console.WriteLine($"parsed section '{currentSectionName}': {string.Join(", ", currentSection)}");
+                    if(verboseOutput)
+                        Console.WriteLine($"parsed section '{currentSectionName}': {string.Join(", ", currentSection)}");
                 }
 
                 currentSectionName = line[1..^1];
                 currentSection = [];
 
-                Console.WriteLine($"{lineNum}: begin section '{currentSectionName}'");
+                if(verboseOutput)
+                    Console.WriteLine($"{lineNum}: begin section '{currentSectionName}'");
                 continue;
             }
 
@@ -144,7 +150,8 @@ public class IniFile(string data = null)
             string key = line[..ind];
             string value = line[(ind + 1)..];
 
-            Console.WriteLine($"{lineNum}: value '{key}={value}'");
+            if(verboseOutput)
+                Console.WriteLine($"{lineNum}: value '{key}={value}'");
 
             currentSection[key] = value;
         }
@@ -152,7 +159,8 @@ public class IniFile(string data = null)
         if(currentSection is not null)
         {
             result[currentSectionName] = currentSection;
-            Console.WriteLine($"parsed section '{currentSectionName}': {string.Join(", ", currentSection)}");
+            if(verboseOutput)
+                Console.WriteLine($"parsed section '{currentSectionName}': {string.Join(", ", currentSection)}");
         }
 
         return result;
